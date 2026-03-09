@@ -5,7 +5,7 @@ export default function Hero() {
     <section className="relative flex min-h-[80vh] flex-col items-center justify-center text-center px-6">
 
       {/* background gradient */}
-      <div className="absolute inset-0 -z-10 bg-gradient-to-b from-indigo-50 via-white to-white" />
+      <div className="absolute inset-0 -z-10 bg-gradient-to- from-indigo-50 via-white to-white" />
 
       <h1 className="text-5xl font-bold leading-tight md:text-6xl">
         Your Entire Creator World <br />
