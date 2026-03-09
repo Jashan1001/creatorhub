@@ -1,28 +1,40 @@
 import { Button } from "@/components/ui/button"
+import GradientMesh from "@/components/ui/gradientMesh"
 
 export default function Hero() {
   return (
-    <section className="relative flex min-h-[80vh] flex-col items-center justify-center text-center px-6">
+    <section className="relative py-32 flex flex-col items-center justify-center text-center px-6 bg-stone-50 overflow-hidden">
 
-      {/* background gradient */}
-      <div className="absolute inset-0 -z-10 bg-gradient-to- from-indigo-50 via-white to-white" />
+      {/* Animated Gradient Background */}
+      <GradientMesh />
 
-      <h1 className="text-5xl font-bold leading-tight md:text-6xl">
-        Your Entire Creator World <br />
-        <span className="text-indigo-600">in One Link</span>
-      </h1>
+      <div className="relative z-10">
 
-      <p className="mt-6 max-w-xl text-gray-600 text-lg">
-        Build a beautiful page for your links, content, and audience.
-        CreatorHub helps creators grow and monetize easily.
-      </p>
+        <h1 className="text-5xl font-semibold leading-tight md:text-6xl text-zinc-900">
+          Your Entire Creator World <br />
+          <span className="bg-gradient-to-r from-zinc-900 to-zinc-500 bg-clip-text text-transparent">
+            in One Link
+          </span>
+        </h1>
 
-      <div className="mt-8 flex gap-4">
-        <Button size="lg">Create Your Page</Button>
+        <p className="mt-6 max-w-xl text-lg text-zinc-600">
+          Bring your links, content, and audience together in one
+          simple creator page.
+        </p>
 
-        <Button variant="outline" size="lg">
-          View Demo
-        </Button>
+        <div className="mt-8 flex gap-4 justify-center">
+
+          <Button size="lg" className="transition hover:scale-[1.03]">
+            Create Your Page
+          </Button>
+
+          <Button variant="outline" size="lg">
+            View Demo
+          </Button>
+
+        </div>
+        
+
       </div>
 
     </section>

@@ -6,29 +6,30 @@ import { motion } from "framer-motion"
 
 export default function Preview() {
   return (
-    <section className="py-24">
+    <section className="py-28 bg-white">
 
-      <div className="mx-auto grid max-w-6xl items-center gap-12 px-6 md:grid-cols-2">
+      <div className="mx-auto grid max-w-6xl items-center gap-16 px-6 md:grid-cols-2">
 
         {/* LEFT SIDE */}
         <div>
 
-          <h2 className="text-3xl font-bold">
-            Build Your Creator Page
+          <h2 className="text-3xl font-semibold text-zinc-900">
+            A Page Built For Your Audience
           </h2>
 
-          <p className="mt-4 text-gray-600">
-            Share all your links, content, and resources in one place.
-            CreatorHub makes it simple to build a page your audience can explore.
+          <p className="mt-4 max-w-md text-zinc-600 leading-relaxed">
+            Your CreatorHub becomes a single destination where your
+            audience can explore everything you create — links,
+            content, and ways to support you.
           </p>
 
-          <ul className="mt-6 space-y-3 text-gray-700">
+          <ul className="mt-6 space-y-3 text-zinc-600">
 
             <li>• Share links and social media</li>
 
             <li>• Add videos and resources</li>
 
-            <li>• Accept donations and monetize</li>
+            <li>• Accept support and monetize</li>
 
           </ul>
 
@@ -39,11 +40,11 @@ export default function Preview() {
         <div className="flex justify-center">
 
           <motion.div
-            animate={{ y: [0, -12, 0] }}
-            transition={{ duration: 4, repeat: Infinity }}
+            animate={{ y: [0, -10, 0] }}
+            transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
           >
 
-            <Card className="w-[320px] rounded-2xl border shadow-lg hover:shadow-xl transition">
+            <Card className="w-[320px] rounded-2xl border border-zinc-200 bg-white shadow-sm hover:shadow-md transition">
 
               <CardContent className="flex flex-col items-center gap-4 p-8">
 
@@ -51,32 +52,32 @@ export default function Preview() {
                 <img
                   src="https://images.unsplash.com/photo-1544005313-94ddf0286df2"
                   alt="creator"
-                  className="h-20 w-20 rounded-full object-cover shadow"
+                  className="h-20 w-20 rounded-full object-cover"
                 />
 
                 {/* Name */}
-                <h3 className="text-lg font-semibold">
+                <h3 className="text-lg font-semibold text-zinc-900">
                   Jashan
                 </h3>
 
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-zinc-500">
                   Developer • Creator
                 </p>
 
                 {/* Links */}
                 <div className="mt-4 w-full space-y-3">
 
-                  <button className="flex w-full items-center justify-center gap-2 rounded-lg border py-2 text-sm font-medium hover:bg-gray-100">
+                  <button className="flex w-full items-center justify-center gap-2 rounded-lg border border-zinc-200 py-2 text-sm font-medium hover:bg-zinc-50 transition">
                     <Youtube size={16} />
                     YouTube
                   </button>
 
-                  <button className="flex w-full items-center justify-center gap-2 rounded-lg border py-2 text-sm font-medium hover:bg-gray-100">
+                  <button className="flex w-full items-center justify-center gap-2 rounded-lg border border-zinc-200 py-2 text-sm font-medium hover:bg-zinc-50 transition">
                     <Globe size={16} />
                     Portfolio
                   </button>
 
-                  <button className="flex w-full items-center justify-center gap-2 rounded-lg border py-2 text-sm font-medium hover:bg-gray-100">
+                  <button className="flex w-full items-center justify-center gap-2 rounded-lg border border-zinc-200 py-2 text-sm font-medium hover:bg-zinc-50 transition">
                     <Coffee size={16} />
                     Support Me
                   </button>
