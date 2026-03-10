@@ -6,6 +6,7 @@ import connectDB from "./config/db.js";
 import authRoutes from "./routes/authRoutes.js";
 import blockRoutes from "./routes/blockRoutes.js";
 import publicRoutes from "./routes/publicRoutes.js"
+import userRoutes from "./routes/userRoutes.js"
 dotenv.config();
 
 const app = express();
@@ -18,6 +19,7 @@ connectDB();
 app.use("/api/auth", authRoutes);
 app.use("/api/blocks", blockRoutes);
 app.use("/api/public", publicRoutes);
+app.use("/api/user", userRoutes);
 app.get("/", (req, res) => {
   res.send("CreatorHub API running");
 });

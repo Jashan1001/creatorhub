@@ -23,6 +23,10 @@ const userSchema = new mongoose.Schema(
     type: String,
     required: true
   },
+  theme: {
+    type: String,
+    default: "minimal"
+  },
   role: {
   type: String,
   enum: ["creator", "admin"],
