@@ -1,0 +1,76 @@
+@import url("https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap");
+
+@import "tailwindcss";
+
+:root {
+  /* ── Core palette ── */
+  --bg-base:        #0a0b0f;
+  --bg-surface:     #111318;
+  --bg-elevated:    #1a1d24;
+  --bg-hover:       #21252e;
+
+  --border:         #1f2330;
+  --border-subtle:  #171a22;
+  --border-strong:  #2d3344;
+
+  --text-primary:   #e8e8e0;
+  --text-secondary: #8a8f9e;
+  --text-muted:     #4a4f5e;
+  --text-inverse:   #0a0b0f;
+
+  --accent:         #f59e0b;
+  --accent-hover:   #fbbf24;
+  --accent-muted:   #f59e0b1a;
+  --accent-border:  #f59e0b33;
+
+  --success:        #10b981;
+  --danger:         #ef4444;
+  --info:           #3b82f6;
+
+  /* ── Typography ── */
+  --font-display:   "Syne", sans-serif;
+  --font-body:      "DM Sans", sans-serif;
+
+  /* ── Radius ── */
+  --radius-sm:      6px;
+  --radius-md:      10px;
+  --radius-lg:      14px;
+  --radius-xl:      20px;
+
+  /* ── Shadows ── */
+  --shadow-sm:      0 1px 3px rgba(0,0,0,0.4);
+  --shadow-md:      0 4px 16px rgba(0,0,0,0.5);
+  --shadow-lg:      0 8px 32px rgba(0,0,0,0.6);
+  --shadow-accent:  0 0 24px rgba(245,158,11,0.15);
+
+  /* ── Transitions ── */
+  --transition:     150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { font-size: 16px; -webkit-font-smoothing: antialiased; }
+
+body {
+  background-color: var(--bg-base);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  line-height: 1.6;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg-base); }
+::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+/* Selection */
+::selection { background: var(--accent-muted); color: var(--accent); }
+
+/* Focus ring */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}

@@ -1,19 +1,43 @@
-import * as React from "react"
+import { InputHTMLAttributes, forwardRef } from "react";
 
-import { cn } from "@/lib/utils"
-
-function Input({ className, type, ...props }: React.ComponentProps<"input">) {
-  return (
-    <input
-      type={type}
-      data-slot="input"
-      className={cn(
-        "h-8 w-full min-w-0 rounded-lg border border-input bg-transparent px-2.5 py-1 text-base transition-colors outline-none file:inline-flex file:h-6 file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:cursor-not-allowed disabled:bg-input/50 disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 md:text-sm dark:bg-input/30 dark:disabled:bg-input/80 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40",
-        className
-      )}
-      {...props}
-    />
-  )
+interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
+  label?: string;
+  error?: string;
+  hint?: string;
 }
 
-export { Input }
+export const Input = forwardRef<HTMLInputElement, InputProps>(
+  ({ label, error, hint, className = "", ...props }, ref) => {
+    return (
+      <div className="flex flex-col gap-1.5">
+        {label && (
+          <label className="text-sm font-medium text-[var(--text-secondary)]">
+            {label}
+          </label>
+        )}
+        <input
+          ref={ref}
+          className={`
+            w-full px-3 py-2.5 text-sm
+            bg-[var(--bg-elevated)] text-[var(--text-primary)]
+            border rounded-[var(--radius-md)]
+            placeholder:text-[var(--text-muted)]
+            transition-all duration-[var(--transition)]
+            ${error
+              ? "border-[var(--danger)] focus:border-[var(--danger)]"
+              : "border-[var(--border)] focus:border-[var(--accent)]"
+            }
+            focus:outline-none focus:ring-2
+            ${error ? "focus:ring-[var(--danger)]/20" : "focus:ring-[var(--accent)]/20"}
+            ${className}
+          `}
+          {...props}
+        />
+        {error && <p className="text-xs text-[var(--danger)]">{error}</p>}
+        {hint && !error && <p className="text-xs text-[var(--text-muted)]">{hint}</p>}
+      </div>
+    );
+  }
+);
+
+Input.displayName = "Input";
