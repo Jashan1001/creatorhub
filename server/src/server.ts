@@ -12,6 +12,7 @@ import userRoutes from "./routes/userRoutes.js";
 import tierRoutes from "./routes/tierRoutes.js";
 import subscriptionRoutes from "./routes/subscriptionRoutes.js";
 import webhookRoutes from "./routes/webhookRoutes.js";
+import analyticsRoutes from "./routes/analyticsRoutes.js";
 
 dotenv.config();
 
@@ -43,6 +44,7 @@ app.use("/api/public", publicRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/tiers", tierRoutes);
 app.use("/api/subscriptions", subscriptionRoutes);
+app.use("/api/analytics", analyticsRoutes);
 
 app.get("/", (_req, res) => {
   res.json({ status: "CreatorForge API running" });
