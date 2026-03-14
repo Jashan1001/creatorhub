@@ -3,9 +3,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Plus, Trash2, Check, Users, IndianRupee } from "lucide-react";
 import toast from "react-hot-toast";
 import api from "@/lib/api";
-import { Card } from "@/components/ui/Card";
-import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/Badge";
 import type { SubscriptionTier, EarningsSummary } from "@/types";
 

@@ -5,8 +5,8 @@ import { Zap, Eye, EyeOff } from "lucide-react";
 import toast from "react-hot-toast";
 import api from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
-import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 export default function LoginPage() {
   const { login } = useAuth();

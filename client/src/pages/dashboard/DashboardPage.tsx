@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { TrendingUp, MousePointer, Users, DollarSign } from "lucide-react";
-import { Card } from "@/components/ui/Card";
+import { Card } from "@/components/ui/card";
 import { useAuth } from "@/context/AuthContext";
 import api from "@/lib/api";
 import type { AnalyticsSummary, EarningsSummary } from "@/types";
