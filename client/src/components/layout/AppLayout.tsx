@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import type { ReactNode } from "react";
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import {
@@ -23,18 +23,18 @@ export const AppLayout = ({ children }: { children: ReactNode }) => {
   const handleLogout = () => { logout(); navigate("/login"); };
 
   return (
-    <div className="flex h-screen bg-[var(--bg-base)] overflow-hidden">
+    <div className="flex h-screen bg-(--bg-base) overflow-hidden">
 
       {/* Sidebar */}
-      <aside className="w-[220px] flex-shrink-0 flex flex-col border-r border-[var(--border)] bg-[var(--bg-surface)]">
+      <aside className="w-55 shrink-0 flex flex-col border-r border-(--border) bg-(--bg-surface)">
 
         {/* Logo */}
-        <div className="h-16 flex items-center px-5 border-b border-[var(--border)]">
+        <div className="h-16 flex items-center px-5 border-b border-(--border)">
           <div className="flex items-center gap-2">
             <div className="w-7 h-7 rounded-md bg-accent flex items-center justify-center">
-              <Zap size={14} className="text-[var(--text-inverse)]" />
+              <Zap size={14} className="text-(--text-inverse)" />
             </div>
-            <span className="font-bold text-[var(--text-primary)] tracking-tight" style={{ fontFamily: "var(--font-display)" }}>
+            <span className="font-bold text-(--text-primary) tracking-tight" style={{ fontFamily: "var(--font-display)" }}>
               CreatorForge
             </span>
           </div>
@@ -48,11 +48,11 @@ export const AppLayout = ({ children }: { children: ReactNode }) => {
               to={to}
               end={to === "/dashboard"}
               className={({ isActive }) => `
-                flex items-center gap-3 px-3 py-2 rounded-[var(--radius-md)]
-                text-sm transition-all duration-[var(--transition)]
+                flex items-center gap-3 px-3 py-2 rounded-md
+                text-sm transition-all duration-(--transition)
                 ${isActive
-                  ? "bg-[var(--accent-muted)] text-[var(--accent)] font-medium"
-                  : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)]"
+                  ? "bg-(--accent-muted) text-(--accent) font-medium"
+                  : "text-(--text-secondary) hover:text-(--text-primary) hover:bg-(--bg-elevated)"
                 }
               `}
             >
@@ -63,15 +63,15 @@ export const AppLayout = ({ children }: { children: ReactNode }) => {
         </nav>
 
         {/* User + actions */}
-        <div className="p-3 border-t border-[var(--border)] flex flex-col gap-1">
+        <div className="p-3 border-t border-(--border) flex flex-col gap-1">
           {user && (
             <a
               href={`/${user.username}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-3 px-3 py-2 rounded-[var(--radius-md)]
-                text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)]
-                hover:bg-[var(--bg-elevated)] transition-all duration-[var(--transition)]"
+              className="flex items-center gap-3 px-3 py-2 rounded-md
+                text-sm text-(--text-secondary) hover:text-(--text-primary)
+                hover:bg-(--bg-elevated) transition-all duration-(--transition)"
             >
               <ExternalLink size={16} />
               View page
@@ -79,9 +79,9 @@ export const AppLayout = ({ children }: { children: ReactNode }) => {
           )}
           <button
             onClick={handleLogout}
-            className="flex items-center gap-3 px-3 py-2 rounded-[var(--radius-md)]
-              text-sm text-[var(--text-secondary)] hover:text-[var(--danger)]
-              hover:bg-[var(--danger)]/5 transition-all duration-[var(--transition)] w-full text-left"
+            className="flex items-center gap-3 px-3 py-2 rounded-md
+              text-sm text-(--text-secondary) hover:text-(--danger)
+              hover:bg-(--danger)/5 transition-all duration-(--transition) w-full text-left"
           >
             <LogOut size={16} />
             Log out
@@ -90,15 +90,15 @@ export const AppLayout = ({ children }: { children: ReactNode }) => {
           {/* Avatar + name */}
           {user && (
             <div className="flex items-center gap-3 px-3 py-2 mt-1">
-              <div className="w-7 h-7 rounded-full bg-[var(--bg-elevated)] border border-[var(--border)] overflow-hidden flex-shrink-0">
+              <div className="w-7 h-7 rounded-full bg-(--bg-elevated) border border-(--border) overflow-hidden shrink-0">
                 {user.avatar
                   ? <img src={user.avatar} alt={user.name} className="w-full h-full object-cover" />
-                  : <div className="w-full h-full flex items-center justify-center text-xs text-[var(--text-muted)] font-medium">{user.name[0]}</div>
+                  : <div className="w-full h-full flex items-center justify-center text-xs text-(--text-muted) font-medium">{user.name[0]}</div>
                 }
               </div>
               <div className="flex flex-col min-w-0">
-                <span className="text-xs font-medium text-[var(--text-primary)] truncate">{user.name}</span>
-                <span className="text-xs text-[var(--text-muted)] truncate">@{user.username}</span>
+                <span className="text-xs font-medium text-(--text-primary) truncate">{user.name}</span>
+                <span className="text-xs text-(--text-muted) truncate">@{user.username}</span>
               </div>
             </div>
           )}
@@ -121,3 +121,5 @@ export const AppLayout = ({ children }: { children: ReactNode }) => {
     </div>
   );
 };
+
+

@@ -42,7 +42,7 @@ export interface Subscription {
 }
 
 export interface AnalyticsSummary {
-  daily: { _id: string; views: number; clicks: number }[];
+  daily: { date: string; views: number; clicks: number }[];
   devices: { _id: string; count: number }[];
   topLinks: { _id: string; clicks: number; title: string; url: string }[];
   totals: { views: number; clicks: number };
@@ -52,3 +52,4 @@ export interface EarningsSummary {
   totalSubscribers: number;
   mrr: number; // paise
 }
+
