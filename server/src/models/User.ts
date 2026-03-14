@@ -10,7 +10,7 @@ export interface IUser extends Document {
   theme: "minimal" | "dark" | "gradient";
   plan: "free" | "pro" | "business";
   role: "creator" | "admin";
-  stripeCustomerId?: string;
+  razorpayCustomerId?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -26,7 +26,7 @@ const userSchema = new Schema<IUser>(
     theme: { type: String, enum: ["minimal", "dark", "gradient"], default: "minimal" },
     plan: { type: String, enum: ["free", "pro", "business"], default: "free" },
     role: { type: String, enum: ["creator", "admin"], default: "creator" },
-    stripeCustomerId: { type: String },
+    razorpayCustomerId: { type: String },
   },
   { timestamps: true }
 );

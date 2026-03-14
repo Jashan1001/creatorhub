@@ -9,32 +9,40 @@ import authRoutes from "./routes/authRoutes.js";
 import blockRoutes from "./routes/blockRoutes.js";
 import publicRoutes from "./routes/publicRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
+import tierRoutes from "./routes/tierRoutes.js";
+import subscriptionRoutes from "./routes/subscriptionRoutes.js";
+import webhookRoutes from "./routes/webhookRoutes.js";
 
 dotenv.config();
 
 const app = express();
 
-// Security
+// ── Security ───────────────────────────────────────────────────
 app.use(helmet());
 app.use(cors({
   origin: process.env.CLIENT_URL ?? "http://localhost:5173",
   credentials: true,
 }));
 
-// Body parsing
+// ── Body parsing ───────────────────────────────────────────────
 app.use(express.json({ limit: "10kb" }));
 
-// Rate limiting
+// ── Rate limiting ──────────────────────────────────────────────
 app.use(globalLimiter);
 
-// DB
+// ── Webhooks ────────────────────────────────────────────────────
+app.use("/api/webhooks", webhookRoutes);
+
+// ── DB ─────────────────────────────────────────────────────────
 connectDB();
 
-// Routes
+// ── Routes ─────────────────────────────────────────────────────
 app.use("/api/auth", authRoutes);
 app.use("/api/blocks", blockRoutes);
 app.use("/api/public", publicRoutes);
 app.use("/api/user", userRoutes);
+app.use("/api/tiers", tierRoutes);
+app.use("/api/subscriptions", subscriptionRoutes);
 
 app.get("/", (_req, res) => {
   res.json({ status: "CreatorForge API running" });
