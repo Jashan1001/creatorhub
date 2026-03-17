@@ -14,7 +14,7 @@ export interface User {
 export interface Block {
   _id: string;
   userId: string;
-  type: "link" | "text" | "image" | "video" | "paid_post" | "locked";
+  type: "link" | "text" | "image" | "video" | "header" | "social" | "divider" | "paid_post" | "locked";
   content: Record<string, unknown>;
   position: number;
   visible: boolean;

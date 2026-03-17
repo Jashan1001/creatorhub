@@ -4,17 +4,17 @@ interface BadgeProps {
 }
 
 const badgeVariants = {
-  default: "bg-(--bg-elevated) text-(--text-secondary) border-(--border)",
-  success: "bg-(--success)/10 text-(--success) border-(--success)/20",
-  warning: "bg-amber-500/10 text-amber-400 border-amber-500/20",
-  danger:  "bg-(--danger)/10 text-(--danger) border-(--danger)/20",
-  accent:  "bg-(--accent-muted) text-(--accent) border-(--accent-border)",
+  default: "bg-[var(--bg-elevated)] text-[var(--text-secondary)] border-[var(--border)]",
+  success: "bg-[var(--success)]/15 text-[var(--success)] border-[var(--success)]/30",
+  warning: "bg-amber-600/12 text-amber-800 border-amber-700/30",
+  danger:  "bg-[var(--danger)]/15 text-[var(--danger)] border-[var(--danger)]/30",
+  accent:  "bg-[var(--accent-muted)] text-[var(--accent)] border-[var(--accent-border)]",
 };
 
 export const Badge = ({ children, variant = "default" }: BadgeProps) => (
   <span className={`
     inline-flex items-center px-2 py-0.5 text-xs font-medium
-    border rounded-full
+    border-[1.5px] rounded-full
     ${badgeVariants[variant]}
   `}>
     {children}

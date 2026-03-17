@@ -7,7 +7,8 @@ interface AuthContextType {
   user: User | null;
   token: string | null;
   loading: boolean;
-  login: (token: string, user: User) => void;
+  login: (email: string, password: string) => Promise<void>;
+  signup: (name: string, username: string, email: string, password: string) => Promise<void>;
   logout: () => void;
   refreshUser: () => Promise<void>;
 }
@@ -19,10 +20,24 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const login = (newToken: string, newUser: User) => {
+  const setSession = (newToken: string, newUser: User) => {
     localStorage.setItem("cf_token", newToken);
     setToken(newToken);
     setUser(newUser);
+  };
+
+  const login = async (email: string, password: string) => {
+    const res = await api.post("/auth/login", { email, password });
+    if (res.data?.token && res.data?.user) {
+      setSession(res.data.token, res.data.user);
+    }
+  };
+
+  const signup = async (name: string, username: string, email: string, password: string) => {
+    const res = await api.post("/auth/signup", { name, username, email, password });
+    if (res.data?.token && res.data?.user) {
+      setSession(res.data.token, res.data.user);
+    }
   };
 
   const logout = () => {
@@ -51,7 +66,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, token, loading, login, logout, refreshUser }}>
+    <AuthContext.Provider value={{ user, token, loading, login, signup, logout, refreshUser }}>
       {children}
     </AuthContext.Provider>
   );

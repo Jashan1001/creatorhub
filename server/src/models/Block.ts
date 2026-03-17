@@ -2,7 +2,7 @@ import mongoose, { Document, Schema } from "mongoose";
 
 export interface IBlock extends Document {
   userId: mongoose.Types.ObjectId;
-  type: "link" | "text" | "image" | "video" | "paid_post";
+  type: "link" | "text" | "image" | "video" | "header" | "social" | "divider" | "paid_post";
   content: Record<string, unknown>;
   position: number;
   visible: boolean;
@@ -16,7 +16,7 @@ const blockSchema = new Schema<IBlock>(
     userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
     type: {
       type: String,
-      enum: ["link", "text", "image", "video", "paid_post"],
+      enum: ["link", "text", "image", "video", "header", "social", "divider", "paid_post"],
       required: true,
     },
     content: { type: Schema.Types.Mixed, default: {} },

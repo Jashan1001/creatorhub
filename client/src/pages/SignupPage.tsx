@@ -1,142 +1,120 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
-import { Zap, Eye, EyeOff } from "lucide-react";
-import toast from "react-hot-toast";
-import api from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
+import { UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
 export default function SignupPage() {
-  const { login } = useAuth();
   const navigate = useNavigate();
+  const { signup } = useAuth();
+  
   const [form, setForm] = useState({
-    name: "", username: "", email: "", password: "", confirm: "",
+    name: "",
+    username: "",
+    email: "",
+    password: "",
   });
-  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const validate = () => {
-    const e: Record<string, string> = {};
-    if (form.name.length < 2) e.name = "Name must be at least 2 characters";
-    if (!/^[a-zA-Z0-9_]{3,30}$/.test(form.username)) {
-      e.username = "3-30 characters, letters/numbers/underscores only";
-    }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) e.email = "Enter a valid email";
-    if (form.password.length < 8) e.password = "Password must be at least 8 characters";
-    if (form.password !== form.confirm) e.confirm = "Passwords do not match";
-    return e;
-  };
+  const f = (k: string, v: string) => setForm((p) => ({ ...p, [k]: v }));
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const errs = validate();
-    if (Object.keys(errs).length) { setErrors(errs); return; }
-    setErrors({});
+    setError("");
     setLoading(true);
+
     try {
-      const res = await api.post("/auth/signup", {
-        name: form.name,
-        username: form.username,
-        email: form.email,
-        password: form.password,
-      });
-      login(res.data.token, res.data.user);
-      toast.success("Account created!");
+      await signup(form.name, form.username, form.email, form.password);
       navigate("/dashboard");
     } catch (err: any) {
-      const msg = err.response?.data?.message ?? "Signup failed";
-      if (msg.toLowerCase().includes("email")) setErrors({ email: msg });
-      else if (msg.toLowerCase().includes("username")) setErrors({ username: msg });
-      else toast.error(msg);
+      setError(err?.response?.data?.message || "Failed to create account");
     } finally {
       setLoading(false);
     }
   };
 
-  const f = (key: string, val: string) => setForm({ ...form, [key]: val });
-
   return (
-    <div className="min-h-screen bg-(--bg-base) flex items-center justify-center p-8">
-      <motion.div
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3 }}
-        className="w-full max-w-110"
+    <div className="min-h-screen flex items-center justify-center bg-[var(--bg-base)] font-body py-12 px-4">
+      <form
+        onSubmit={handleSubmit}
+        className="bg-[var(--bg-surface)] p-8 rounded-xl shadow-[var(--shadow-md)] border border-[var(--border)] w-full max-w-sm flex flex-col gap-5"
       >
-        {/* Logo */}
-        <div className="flex items-center gap-2 mb-8">
-          <div className="w-8 h-8 rounded-md bg-accent flex items-center justify-center">
-            <Zap size={16} className="text-(--text-inverse)" />
+        <div className="text-center mb-2">
+          <div className="mx-auto w-12 h-12 bg-[var(--bg-elevated)] rounded-full flex items-center justify-center mb-4">
+            <UserPlus size={24} className="text-[var(--text-secondary)]" />
           </div>
-          <span className="font-display font-bold text-lg text-(--text-primary)">
-            CreatorForge
-          </span>
-        </div>
-
-        <div className="mb-8">
-          <h2 className="font-display text-2xl font-bold text-(--text-primary) mb-1">
-            Create your account
-          </h2>
-          <p className="text-sm text-(--text-secondary)">
-            Already have one?{" "}
-            <Link to="/login" className="text-accent hover:underline">Sign in</Link>
+          <h1 className="font-display text-2xl font-bold text-[var(--text-primary)] tracking-tight">
+            Create Account
+          </h1>
+          <p className="text-sm text-[var(--text-muted)] mt-1">
+            Start building your CreatorHub today
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <Input label="Full name" placeholder="Jashan Singh"
-            value={form.name} onChange={(e) => f("name", e.target.value)}
-            error={errors.name} required />
+        {error && (
+          <p className="text-sm text-[var(--danger)] bg-[var(--danger)]/10 border border-[var(--danger)]/20 rounded-md px-3 py-2 text-center">
+            {error}
+          </p>
+        )}
 
-          <Input label="Username" placeholder="jashan"
-            value={form.username} onChange={(e) => f("username", e.target.value.toLowerCase())}
-            error={errors.username}
-            hint="This will be your public URL: creatorforge.vercel.app/@jashan"
-            required />
+        <div className="flex flex-col gap-4">
+          <Input
+            label="Full name"
+            name="name"
+            placeholder="Jashan"
+            value={form.name}
+            onChange={(e) => f("name", e.target.value)}
+            required
+          />
 
-          <Input label="Email" type="email" placeholder="you@example.com"
-            value={form.email} onChange={(e) => f("email", e.target.value)}
-            error={errors.email} required />
+          <Input
+            label="Username"
+            name="username"
+            placeholder="jashan"
+            value={form.username}
+            onChange={(e) => f("username", e.target.value)}
+            required
+            hint="creatorhub.co/jashan"
+          />
 
-          {/* Password with toggle */}
-          {(["password", "confirm"] as const).map((field) => (
-            <div key={field} className="flex flex-col gap-1.5">
-              <label className="text-sm font-medium text-(--text-secondary)">
-                {field === "password" ? "Password" : "Confirm password"}
-              </label>
-              <div className="relative">
-                <input
-                  type={showPassword ? "text" : "password"}
-                  placeholder="••••••••"
-                  value={form[field]}
-                  onChange={(e) => f(field, e.target.value)}
-                  className="w-full px-3 py-2.5 pr-10 text-sm bg-(--bg-elevated) text-(--text-primary) border rounded-md placeholder:text-(--text-muted) focus:outline-none focus:border-(--accent) focus:ring-2 focus:ring-(--accent)/20 transition-all duration-(--transition) border-(--border)"
-                  required
-                />
-                {field === "password" && (
-                  <button type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-(--text-muted) hover:text-(--text-secondary)">
-                    {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                  </button>
-                )}
-              </div>
-              {errors[field] && (
-                <p className="text-xs text-(--danger)">{errors[field]}</p>
-              )}
-            </div>
-          ))}
+          <Input
+            label="Email"
+            name="email"
+            type="email"
+            placeholder="you@example.com"
+            value={form.email}
+            onChange={(e) => f("email", e.target.value)}
+            required
+          />
 
-          <Button type="submit" loading={loading} size="lg" className="mt-2 w-full">
-            Create account
-          </Button>
-        </form>
-      </motion.div>
+          <Input
+            label="Password"
+            name="password"
+            type="password"
+            placeholder="••••••••"
+            value={form.password}
+            onChange={(e) => f("password", e.target.value)}
+            required
+          />
+        </div>
+
+        <button
+          type="submit"
+          disabled={loading}
+          className="w-full bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-[var(--text-inverse)] py-2.5 rounded-lg font-semibold transition-colors mt-2 disabled:opacity-50"
+        >
+          {loading ? "Creating..." : "Sign Up"}
+        </button>
+
+        <p className="text-sm text-center text-[var(--text-muted)] mt-2">
+          Already have an account?{" "}
+          <Link to="/login" className="text-[var(--text-primary)] font-semibold hover:underline">
+            Log in
+          </Link>
+        </p>
+      </form>
     </div>
   );
 }
-
-

@@ -18,10 +18,32 @@ dotenv.config();
 
 const app = express();
 
+const configuredOrigins = (process.env.CLIENT_URL ?? "")
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
+const defaultOrigins = ["http://localhost:5173", "http://127.0.0.1:5173"];
+const allowedOrigins = configuredOrigins.length ? configuredOrigins : defaultOrigins;
+
 // ── Security ───────────────────────────────────────────────────
 app.use(helmet());
 app.use(cors({
-  origin: process.env.CLIENT_URL ?? "http://localhost:5173",
+  origin: (origin, callback) => {
+    // Allow no-origin requests (curl, server-to-server, some dev tooling).
+    if (!origin) {
+      callback(null, true);
+      return;
+    }
+
+    const isLocalhostDevOrigin = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin);
+    if (allowedOrigins.includes(origin) || isLocalhostDevOrigin) {
+      callback(null, true);
+      return;
+    }
+
+    callback(new Error("Not allowed by CORS"));
+  },
   credentials: true,
 }));
 
@@ -46,8 +68,8 @@ app.use("/api/tiers", tierRoutes);
 app.use("/api/subscriptions", subscriptionRoutes);
 app.use("/api/analytics", analyticsRoutes);
 
-app.get("/", (_req, res) => {
-  res.json({ status: "CreatorForge API running" });
+app.get("/api/health", (req, res) => {
+  res.json({ status: "CreatorHub API running" });
 });
 
 const PORT = Number(process.env.PORT) || 5000;

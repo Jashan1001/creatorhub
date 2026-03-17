@@ -15,34 +15,37 @@ interface CreatorPageData {
 
 const themeConfig = {
   minimal: {
-    bg: "#ffffff",
-    surface: "#f9f9f7",
-    text: "#0a0a0a",
-    subtext: "#6b7280",
-    border: "#e5e7eb",
-    linkBg: "#0a0a0a",
-    linkText: "#ffffff",
-    linkHover: "#1a1a1a",
+    bg: "#FAF8F5", // bg-base
+    surface: "#ffffff",
+    text: "#2a1a12", // text-primary
+    subtext: "#6b5040", // text-secondary
+    border: "#c8bab0", // border
+    linkBg: "#ede8df", // bg-elevated
+    linkText: "#2a1a12",
+    linkHover: "#dfd3c9", // border-subtle
+    accent: "#a05c3e", // accent
   },
   dark: {
-    bg: "#0a0b0f",
-    surface: "#111318",
-    text: "#e8e8e0",
-    subtext: "#8a8f9e",
-    border: "#1f2330",
-    linkBg: "#1a1d24",
-    linkText: "#e8e8e0",
-    linkHover: "#21252e",
+    bg: "#1a1614",
+    surface: "#2a221f",
+    text: "#f5f0e8",
+    subtext: "#c8bab0",
+    border: "#4b3c34",
+    linkBg: "#3a2e28",
+    linkText: "#fffdf8",
+    linkHover: "#4b3c34",
+    accent: "#d4a373",
   },
   gradient: {
-    bg: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-    surface: "rgba(255,255,255,0.1)",
+    bg: "linear-gradient(135deg, #a05c3e 0%, #db9065 100%)",
+    surface: "rgba(255,255,255,0.15)",
     text: "#ffffff",
-    subtext: "rgba(255,255,255,0.7)",
-    border: "rgba(255,255,255,0.15)",
-    linkBg: "rgba(255,255,255,0.15)",
+    subtext: "rgba(255,255,255,0.85)",
+    border: "rgba(255,255,255,0.25)",
+    linkBg: "rgba(255,255,255,0.2)",
     linkText: "#ffffff",
-    linkHover: "rgba(255,255,255,0.25)",
+    linkHover: "rgba(255,255,255,0.3)",
+    accent: "#ffffff",
   },
 } as const;
 
@@ -63,9 +66,9 @@ const LinkBlock = ({ block, theme }: { block: Block; theme: Theme }) => {
       target="_blank"
       rel="noopener noreferrer"
       onClick={handleClick}
-      whileHover={{ scale: 1.01 }}
+      whileHover={{ scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
-      className="flex items-center justify-between w-full px-5 py-3.5 rounded-xl border transition-all duration-150 group"
+      className="flex items-center justify-between w-full px-5 py-4 rounded-xl border transition-all duration-150 group shadow-sm hover:shadow-md"
       style={{
         background: theme.linkBg,
         color: theme.linkText,
@@ -73,18 +76,16 @@ const LinkBlock = ({ block, theme }: { block: Block; theme: Theme }) => {
       }}
     >
       <div className="flex items-center gap-3 min-w-0">
-        <div className="w-6 h-6 rounded-md flex items-center justify-center opacity-60 shrink-0" style={{ background: theme.border }}>
-          <Link2 size={12} />
-        </div>
-        <span className="text-sm font-medium truncate">{(block.content.title as string) || "Link"}</span>
+        <Link2 size={18} style={{ color: theme.text }} />
+        <span className="text-sm font-bold truncate tracking-tight">{(block.content.title as string) || "Link"}</span>
       </div>
-      <ExternalLink size={14} className="opacity-40 group-hover:opacity-70 transition-opacity shrink-0" />
+      <ExternalLink size={16} className="opacity-40 group-hover:opacity-100 transition-opacity shrink-0" />
     </motion.a>
   );
 };
 
 const TextBlock = ({ block, theme }: { block: Block; theme: Theme }) => (
-  <p className="text-sm text-center leading-relaxed" style={{ color: theme.subtext }}>
+  <p className="text-sm text-center leading-relaxed font-semibold my-2" style={{ color: theme.text }}>
     {block.content.text as string}
   </p>
 );
@@ -93,9 +94,9 @@ const ImageBlock = ({ block }: { block: Block }) => {
   const caption = block.content.caption as string | undefined;
 
   return (
-    <div className="w-full rounded-xl overflow-hidden">
+    <div className="w-full rounded-xl overflow-hidden shadow-sm">
       <img src={block.content.url as string} alt={caption || ""} className="w-full object-cover" />
-      {caption ? <p className="text-xs text-center mt-2 opacity-60">{caption}</p> : null}
+      {caption ? <p className="text-xs text-center mt-3 opacity-70 font-semibold">{caption}</p> : null}
     </div>
   );
 };
@@ -107,36 +108,75 @@ const VideoBlock = ({ block }: { block: Block }) => {
     .replace("youtu.be/", "youtube.com/embed/");
 
   return (
-    <div className="w-full aspect-video rounded-xl overflow-hidden">
+    <div className="w-full aspect-video rounded-xl overflow-hidden shadow-sm">
       <iframe src={embedUrl} className="w-full h-full" allowFullScreen title="Video" />
     </div>
   );
 };
 
+const HeaderBlock = ({ block, theme }: { block: Block; theme: Theme }) => (
+  <h2 className="text-xl font-black text-center tracking-tight my-1" style={{ color: theme.text }}>
+    {(block.content.text as string) || "Section"}
+  </h2>
+);
+
+const SocialBlock = ({ block, theme }: { block: Block; theme: Theme }) => {
+  const platform = (block.content.platform as string) || "social";
+  const handle = ((block.content.handle as string) || "").replace(/^@+/, "");
+  const url = getSocialUrl(platform, handle);
+
+  return (
+    <motion.a
+      href={url}
+      target="_blank"
+      rel="noopener noreferrer"
+      whileHover={{ scale: 1.02 }}
+      whileTap={{ scale: 0.98 }}
+      className="flex items-center justify-center gap-2 w-full px-5 py-3 rounded-xl border transition-all duration-150 font-bold shadow-sm hover:shadow-md"
+      style={{
+        background: theme.linkBg,
+        color: theme.linkText,
+        borderColor: theme.border,
+      }}
+    >
+      <span className="capitalize">{platform}</span>
+      {handle ? <span className="opacity-80">@{handle}</span> : null}
+    </motion.a>
+  );
+};
+
+const DividerBlock = ({ block, theme }: { block: Block; theme: Theme }) => (
+  <div className={block.content.spaced ? "my-6" : "my-3"}>
+    <hr style={{ borderColor: theme.border, opacity: 0.7 }} />
+  </div>
+);
+
 const LockedBlock = ({
-  theme,
   onSubscribeClick,
+  theme
 }: {
-  theme: Theme;
   onSubscribeClick: () => void;
+  theme: Theme;
 }) => (
   <motion.div
     initial={{ opacity: 0 }}
     animate={{ opacity: 1 }}
-    className="flex items-center justify-between w-full px-5 py-3.5 rounded-xl border cursor-pointer group"
-    style={{ borderColor: theme.border, background: theme.surface }}
+    whileHover={{ scale: 1.02 }}
+    whileTap={{ scale: 0.98 }}
+    className="flex items-center justify-between w-full px-5 py-4 rounded-xl border-2 cursor-pointer group transition-all shadow-sm hover:shadow-md"
+    style={{ borderColor: theme.accent, background: theme.surface }}
     onClick={onSubscribeClick}
   >
-    <div className="flex items-center gap-3">
-      <div className="w-6 h-6 rounded-md flex items-center justify-center" style={{ background: "#f59e0b1a" }}>
-        <Lock size={12} className="text-amber-400" />
+    <div className="flex items-center gap-4">
+      <div className="w-10 h-10 rounded-full flex items-center justify-center opacity-90 shadow-inner" style={{ background: theme.linkBg }}>
+        <Lock size={16} style={{ color: theme.text }} />
       </div>
       <div>
-        <p className="text-sm font-medium" style={{ color: theme.text }}>Subscribers only</p>
-        <p className="text-xs opacity-50" style={{ color: theme.subtext }}>Subscribe to unlock this content</p>
+        <p className="text-sm font-bold tracking-tight" style={{ color: theme.text }}>Exclusive content</p>
+        <p className="text-xs mt-0.5 font-semibold" style={{ color: theme.subtext }}>Subscribe to unlock</p>
       </div>
     </div>
-    <span className="text-xs font-medium text-amber-400">Unlock -&gt;</span>
+    <span className="text-xs font-bold uppercase tracking-wider px-3 py-1.5 rounded-full shadow-sm" style={{ background: theme.accent, color: theme.bg === themeConfig.gradient.bg ? theme.bg : theme.surface }}>Unlock</span>
   </motion.div>
 );
 
@@ -175,10 +215,10 @@ const SubscribeModal = ({
         const rzp = new (window as any).Razorpay({
           key: keyId,
           subscription_id: subscriptionId,
-          name: "CreatorForge",
+          name: "CreatorHub",
           description: `${tier.name} - ${creatorName}`,
           handler: async (response: any) => {
-            await api.post("/subscriptions/verify", {
+             await api.post("/subscriptions/verify", {
               razorpaySubscriptionId: response.razorpay_subscription_id,
               razorpayPaymentId: response.razorpay_payment_id,
               razorpaySignature: response.razorpay_signature,
@@ -186,7 +226,7 @@ const SubscribeModal = ({
             });
             onSuccess();
           },
-          modal: {
+             modal: {
             ondismiss: () => setLoading(null),
           },
         });
@@ -203,56 +243,54 @@ const SubscribeModal = ({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4"
-      style={{ background: "rgba(0,0,0,0.7)" }}
-      onClick={onClose}
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 font-body"
+      style={{ background: "rgba(42,26,18,0.6)", backdropFilter: "blur(4px)" }}
+       onClick={onClose}
     >
       <motion.div
-        initial={{ y: 40, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        exit={{ y: 40, opacity: 0 }}
-        transition={{ duration: 0.25 }}
-        className="w-full max-w-md rounded-2xl overflow-hidden"
-        style={{ background: "#111318", border: "1px solid #1f2330" }}
+        initial={{ y: 40, opacity: 0, scale: 0.95 }}
+        animate={{ y: 0, opacity: 1, scale: 1 }}
+        exit={{ y: 40, opacity: 0, scale: 0.95 }}
+        transition={{ duration: 0.2 }}
+        className="w-full max-w-md rounded-2xl overflow-hidden bg-[var(--bg-surface)] shadow-[var(--shadow-lg)]"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="px-6 py-5 border-b" style={{ borderColor: "#1f2330" }}>
+        <div className="px-6 py-5 border-b border-[var(--border)] bg-[var(--bg-base)]">
           <div className="flex items-center gap-2 mb-1">
-            <Zap size={16} className="text-amber-400" />
-            <h3 className="font-display font-bold text-white">Support {creatorName}</h3>
+             <Zap size={18} className="text-[var(--text-primary)]" />
+            <h3 className="font-display text-lg font-bold text-[var(--text-primary)] tracking-tight">Support {creatorName}</h3>
           </div>
-          <p className="text-sm" style={{ color: "#8a8f9e" }}>
-            Choose a tier to unlock exclusive content
+          <p className="text-sm font-semibold text-[var(--text-secondary)]">
+            Choose a tier to unlock their exclusive content
           </p>
         </div>
 
-        <div className="p-4 flex flex-col gap-3">
+        <div className="p-5 flex flex-col gap-3">
           {tiers.map((tier) => (
-            <motion.button
+             <motion.button
               key={tier._id}
               whileTap={{ scale: 0.98 }}
               onClick={() => handleSubscribe(tier)}
               disabled={!!loading}
-              className="flex items-start justify-between w-full p-4 rounded-xl border text-left transition-all"
-              style={{ borderColor: "#2d3344", background: "#1a1d24" }}
+              className="flex items-start justify-between w-full p-4 rounded-xl border border-[var(--border)] text-left transition-all hover:border-[var(--accent)] hover:shadow-[var(--shadow-sm)] bg-[var(--bg-surface)]"
             >
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1">
-                  <span className="text-sm font-semibold text-white">{tier.name}</span>
+                   <span className="font-display text-base font-bold text-[var(--text-primary)]">{tier.name}</span>
                   {loading === tier._id && (
-                    <span className="w-3.5 h-3.5 border-2 border-amber-400 border-t-transparent rounded-full animate-spin" />
+                     <span className="w-4 h-4 border-2 border-[var(--accent)] border-t-transparent rounded-full animate-spin" />
                   )}
                 </div>
                 {tier.description && (
-                  <p className="text-xs mb-2" style={{ color: "#8a8f9e" }}>
+                  <p className="text-xs font-semibold text-[var(--text-secondary)] mb-3 leading-relaxed">
                     {tier.description}
                   </p>
                 )}
                 {tier.benefits.length > 0 && (
-                  <ul className="flex flex-col gap-1">
+                  <ul className="flex flex-col gap-1.5 mt-2 pt-2 border-t border-[var(--border-subtle)]">
                     {tier.benefits.map((b, i) => (
-                      <li key={i} className="flex items-center gap-1.5 text-xs" style={{ color: "#8a8f9e" }}>
-                        <CheckCircle2 size={11} className="text-amber-400 shrink-0" />
+                      <li key={i} className="flex items-center gap-2 text-xs font-bold text-[var(--text-primary)]">
+                         <CheckCircle2 size={14} className="text-[var(--success)] shrink-0" />
                         {b}
                       </li>
                     ))}
@@ -260,20 +298,19 @@ const SubscribeModal = ({
                 )}
               </div>
               <div className="ml-4 shrink-0 text-right">
-                <span className="text-sm font-bold text-amber-400">₹{(tier.price / 100).toLocaleString("en-IN")}</span>
-                <span className="text-xs block" style={{ color: "#8a8f9e" }}>/month</span>
+                <span className="font-display text-lg font-black text-[var(--text-primary)]">₹{(tier.price / 100).toLocaleString("en-IN")}</span>
+                <span className="text-xs font-bold text-[var(--text-muted)] block mt-0.5">/ month</span>
               </div>
             </motion.button>
           ))}
         </div>
 
-        <div className="px-4 pb-4">
+        <div className="px-5 pb-5">
           <button
             onClick={onClose}
-            className="w-full py-2.5 text-sm rounded-xl transition-colors"
-            style={{ color: "#8a8f9e", background: "#1a1d24" }}
+            className="w-full py-3 text-sm font-bold text-[var(--text-secondary)] hover:text-[var(--text-primary)] bg-[var(--bg-elevated)] hover:bg-[var(--bg-hover)] rounded-xl transition-colors"
           >
-            Maybe later
+            Not right now
           </button>
         </div>
       </motion.div>
@@ -309,42 +346,42 @@ export default function CreatorPage() {
   }, [username]);
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-[#0a0b0f]">
-        <span className="w-8 h-8 border-2 border-amber-400 border-t-transparent rounded-full animate-spin" />
+     return (
+       <div className="min-h-screen flex items-center justify-center bg-[var(--bg-base)]">
+        <span className="w-8 h-8 border-[3px] border-[var(--accent)] border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
 
   if (notFound || !data) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-[#0a0b0f] gap-3">
-        <p className="font-display text-2xl font-bold text-white">404</p>
-        <p className="text-[#8a8f9e] text-sm">Creator not found</p>
+       <div className="min-h-screen flex flex-col items-center justify-center bg-[var(--bg-base)] gap-2 font-display">
+        <p className="text-4xl font-black text-[var(--text-primary)] tracking-tight">404</p>
+        <p className="text-[var(--text-secondary)] font-bold">This page doesn't exist.</p>
       </div>
     );
   }
 
   const { user, blocks, tiers, isSubscribed } = data;
   const theme = themeConfig[(user.theme as keyof typeof themeConfig) || "minimal"];
-  const isGradient = user.theme === "gradient";
 
   return (
     <>
-      <div className="min-h-screen py-16 px-4" style={{ background: theme.bg, color: theme.text }}>
-        <div className="max-w-[480px] mx-auto flex flex-col gap-4">
+      <div className="min-h-screen py-16 md:py-24 px-4 sm:px-6 font-body" style={{ background: theme.bg, color: theme.text }}>
+        <div className="max-w-[420px] mx-auto flex flex-col gap-8">
           <motion.div
             initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4 }}
-            className="text-center mb-4"
+             animate={{ opacity: 1, y: 0 }}
+             transition={{ duration: 0.4 }}
+             className="text-center mb-6"
           >
-            <div
-              className="w-20 h-20 rounded-full mx-auto mb-4 overflow-hidden flex items-center justify-center text-xl font-bold border-2"
+             <div
+              className="w-24 h-24 rounded-full mx-auto mb-5 overflow-hidden flex items-center justify-center text-3xl font-extrabold shadow-md"
               style={{
-                background: isGradient ? "rgba(255,255,255,0.2)" : theme.surface,
-                borderColor: theme.border,
-                color: theme.text,
+                background: theme.surface,
+                 borderColor: theme.border,
+                borderWidth: "2px",
+                 color: theme.accent,
               }}
             >
               {user.avatar ? (
@@ -354,21 +391,21 @@ export default function CreatorPage() {
               )}
             </div>
 
-            <h1 className="font-display text-xl font-bold mb-1" style={{ color: theme.text }}>{user.name}</h1>
-            <p className="text-sm opacity-60 mb-2" style={{ color: theme.subtext }}>@{user.username}</p>
+            <h1 className="font-display text-3xl font-black tracking-tight mb-1" style={{ color: theme.text }}>{user.name}</h1>
+            <p className="text-sm font-bold opacity-80 mb-4 tracking-wide" style={{ color: theme.subtext }}>@{user.username}</p>
 
             {user.bio && (
-              <p className="text-sm leading-relaxed max-w-xs mx-auto" style={{ color: theme.subtext }}>
+              <p className="text-sm leading-relaxed max-w-sm mx-auto font-semibold" style={{ color: theme.text, opacity: 0.9 }}>
                 {user.bio}
               </p>
             )}
 
             {isSubscribed && (
               <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="inline-flex items-center gap-1.5 mt-3 px-3 py-1 rounded-full text-xs font-medium"
-                style={{ background: "#f59e0b1a", color: "#f59e0b" }}
+                 initial={{ opacity: 0, scale: 0.9 }}
+                 animate={{ opacity: 1, scale: 1 }}
+                className="inline-flex items-center gap-1.5 mt-5 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider shadow-sm"
+                 style={{ background: theme.accent, color: theme.bg === themeConfig.gradient.bg ? theme.bg : theme.surface, opacity: 0.95 }}
               >
                 <CheckCircle2 size={12} />
                 Subscribed
@@ -376,61 +413,64 @@ export default function CreatorPage() {
             )}
           </motion.div>
 
-          <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-4">
             {blocks.map((block, i) => (
               <motion.div
-                key={block._id}
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
+                 key={block._id}
+                 initial={{ opacity: 0, y: 12 }}
+                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3, delay: 0.1 + i * 0.05 }}
               >
                 {block.type === "link" && <LinkBlock block={block} theme={theme} />}
                 {block.type === "text" && <TextBlock block={block} theme={theme} />}
-                {block.type === "image" && <ImageBlock block={block} />}
+                 {block.type === "image" && <ImageBlock block={block} />}
                 {block.type === "video" && <VideoBlock block={block} />}
-                {block.type === "paid_post" && (
-                  <div className="rounded-xl border p-5" style={{ borderColor: theme.border, background: theme.surface }}>
-                    <h3 className="text-sm font-semibold mb-2" style={{ color: theme.text }}>
-                      {(block.content.title as string) || "Exclusive post"}
-                    </h3>
-                    <p className="text-sm leading-relaxed" style={{ color: theme.subtext }}>
+                {block.type === "header" && <HeaderBlock block={block} theme={theme} />}
+                {block.type === "social" && <SocialBlock block={block} theme={theme} />}
+                {block.type === "divider" && <DividerBlock block={block} theme={theme} />}
+                 {block.type === "paid_post" && (
+                   <div className="rounded-xl border-2 p-5 shadow-sm bg-opacity-90" style={{ borderColor: theme.border, background: theme.surface }}>
+                     <h3 className="font-display text-lg font-bold tracking-tight mb-2" style={{ color: theme.text }}>
+                       {(block.content.title as string) || "Exclusive update"}
+                     </h3>
+                    <p className="text-sm leading-relaxed font-semibold mt-2" style={{ color: theme.text, opacity: 0.9 }}>
                       {block.content.text as string}
                     </p>
                   </div>
                 )}
-                {block.type === "locked" && (
-                  <LockedBlock theme={theme} onSubscribeClick={() => setShowModal(true)} />
+                 {block.type === "locked" && (
+                  <LockedBlock onSubscribeClick={() => setShowModal(true)} theme={theme} />
                 )}
               </motion.div>
             ))}
           </div>
 
           {tiers.length > 0 && !isSubscribed && (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }} className="mt-4">
-              <button
+             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }} className="mt-8 pt-8 border-t" style={{ borderColor: theme.border }}>
+               <button
                 onClick={() => setShowModal(true)}
-                className="w-full py-3.5 rounded-xl text-sm font-semibold transition-all duration-150 hover:opacity-90"
-                style={{ background: "#f59e0b", color: "#0a0b0f" }}
+                 className="w-full py-4 rounded-xl text-sm font-bold shadow-lg transition-all hover:scale-[1.02] active:scale-[0.98] uppercase tracking-wider"
+                style={{ background: theme.accent, color: theme.bg === themeConfig.gradient.bg ? theme.bg : theme.surface }}
               >
-                Support {user.name.split(" ")[0]} - Subscribe
+                Become a supporter
               </button>
             </motion.div>
           )}
 
-          <div className="text-center mt-8">
+          <div className="text-center mt-12 pb-4">
             <a
               href="/"
-              className="inline-flex items-center gap-1.5 text-xs opacity-30 hover:opacity-60 transition-opacity"
-              style={{ color: theme.text }}
+               className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest transition-opacity hover:opacity-100 opacity-50"
+               style={{ color: theme.text }}
             >
               <Zap size={10} />
-              Made with CreatorForge
+              Made with CreatorHub
             </a>
           </div>
         </div>
       </div>
 
-      <AnimatePresence>
+       <AnimatePresence>
         {showModal && (
           <SubscribeModal
             tiers={tiers}
@@ -447,3 +487,17 @@ export default function CreatorPage() {
   );
 }
 
+function getSocialUrl(platform: string, handle: string): string {
+  if (!handle) return "#";
+
+  const map: Record<string, string> = {
+    twitter: `https://twitter.com/${handle}`,
+    instagram: `https://instagram.com/${handle}`,
+    youtube: `https://youtube.com/@${handle}`,
+    tiktok: `https://tiktok.com/@${handle}`,
+    github: `https://github.com/${handle}`,
+    linkedin: `https://linkedin.com/in/${handle}`,
+  };
+
+  return map[platform.toLowerCase()] || "#";
+}

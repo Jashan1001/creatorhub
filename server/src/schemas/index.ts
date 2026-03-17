@@ -19,14 +19,14 @@ export const loginSchema = z.object({
 
 // Blocks
 export const createBlockSchema = z.object({
-  type: z.enum(["link", "text", "image", "video", "paid_post"]),
+  type: z.enum(["link", "text", "image", "video", "header", "social", "divider", "paid_post"]),
   content: z.record(z.unknown()).default({}),
   position: z.number().int().min(0).default(0),
   tier: z.enum(["free", "paid"]).default("free"),
 });
 
 export const updateBlockSchema = z.object({
-  type: z.enum(["link", "text", "image", "video", "paid_post"]).optional(),
+  type: z.enum(["link", "text", "image", "video", "header", "social", "divider", "paid_post"]).optional(),
   content: z.record(z.unknown()).optional(),
   position: z.number().int().min(0).optional(),
   visible: z.boolean().optional(),

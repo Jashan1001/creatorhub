@@ -10,9 +10,9 @@ interface CardProps {
 export const Card = ({ children, className = "", hover = false, accent = false }: CardProps) => (
   <div
     className={`
-      bg-(--bg-surface) border rounded-lg p-6
-      ${accent ? "border-(--accent-border) shadow-(--shadow-accent)" : "border-(--border)"}
-      ${hover ? "transition-all duration-(--transition) hover:border-(--border-strong) hover:bg-(--bg-elevated)" : ""}
+      bg-[var(--bg-surface)] border-[1.5px] rounded-lg p-6 shadow-[var(--shadow-sm)]
+      ${accent ? "border-[var(--accent-border)] shadow-[var(--shadow-accent)]" : "border-[var(--border)]"}
+      ${hover ? "transition-all duration-150 hover:border-[var(--border-strong)] hover:bg-[var(--bg-elevated)] hover:-translate-y-px" : ""}
       ${className}
     `}
   >

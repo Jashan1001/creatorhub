@@ -1,7 +1,8 @@
 {
-  "name": "creatorforge-server",
+  "name": "creatorhub-server",
   "version": "1.0.0",
-  "description": "CreatorForge API",
+  "description": "CreatorHub API",
+  "main": "dist/server.js",
   "type": "module",
   "scripts": {
     "dev": "tsx watch src/server.ts",
