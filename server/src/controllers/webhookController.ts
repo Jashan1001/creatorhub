@@ -1,27 +1,44 @@
 import crypto from "crypto";
 import { Request, Response } from "express";
 import Subscription from "../models/Subscription.js";
+import logger from "../lib/logger.js";
 
 export const handleRazorpayWebhook = async (req: Request, res: Response): Promise<void> => {
   const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET;
-  const signature = req.headers["x-razorpay-signature"] as string;
+  const signature     = req.headers["x-razorpay-signature"] as string;
 
   if (!webhookSecret || !signature) {
     res.status(400).json({ message: "Missing webhook secret or signature" });
     return;
   }
 
+  const rawBody = req.body as Buffer;
+  if (!Buffer.isBuffer(rawBody)) {
+    logger.error("Webhook: expected raw Buffer — check server.ts middleware order");
+    res.status(400).json({ message: "Invalid body format" });
+    return;
+  }
+
   const generated = crypto
     .createHmac("sha256", webhookSecret)
-    .update(JSON.stringify(req.body))
+    .update(rawBody)
     .digest("hex");
 
   if (generated !== signature) {
+    logger.warn("Webhook: invalid signature");
     res.status(400).json({ message: "Invalid webhook signature" });
     return;
   }
 
-  const event = req.body;
+  let event: Record<string, any>;
+  try {
+    event = JSON.parse(rawBody.toString("utf8"));
+  } catch {
+    res.status(400).json({ message: "Invalid JSON body" });
+    return;
+  }
+
+  logger.info("Webhook received", { event: event.event });
 
   try {
     switch (event.event) {
@@ -45,7 +62,7 @@ export const handleRazorpayWebhook = async (req: Request, res: Response): Promis
       }
 
       case "subscription.charged": {
-        const subId = event.payload.subscription.entity.id;
+        const subId     = event.payload.subscription.entity.id;
         const periodEnd = event.payload.subscription.entity.current_end;
         await Subscription.findOneAndUpdate(
           { razorpaySubscriptionId: subId },
@@ -67,12 +84,13 @@ export const handleRazorpayWebhook = async (req: Request, res: Response): Promis
       }
 
       default:
+        logger.debug("Webhook: unhandled event", { event: event.event });
         break;
     }
 
     res.json({ received: true });
   } catch (err) {
-    console.error("Webhook handler error:", err);
+    logger.error("Webhook handler error", err);
     res.json({ received: true });
   }
 };

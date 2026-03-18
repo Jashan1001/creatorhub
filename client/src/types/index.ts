@@ -39,6 +39,7 @@ export interface Subscription {
   tierId: SubscriptionTier;
   razorpaySubscriptionId: string;
   status: "active" | "canceled" | "past_due" | "incomplete";
+  currentPeriodEnd?: string;
 }
 
 export interface AnalyticsSummary {

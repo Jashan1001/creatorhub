@@ -5,44 +5,29 @@ import type { User } from "@/types";
 
 interface AuthContextType {
   user: User | null;
-  token: string | null;
   loading: boolean;
-  login: (email: string, password: string) => Promise<void>;
-  signup: (name: string, username: string, email: string, password: string) => Promise<void>;
-  logout: () => void;
+  login: (user: User) => void;
+  logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(null);
+  const [user, setUser]       = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const setSession = (newToken: string, newUser: User) => {
-    localStorage.setItem("cf_token", newToken);
-    setToken(newToken);
+  // Cookie is set by the server — we just verify it's valid by calling /auth/me
+  const login = (newUser: User) => {
     setUser(newUser);
   };
 
-  const login = async (email: string, password: string) => {
-    const res = await api.post("/auth/login", { email, password });
-    if (res.data?.token && res.data?.user) {
-      setSession(res.data.token, res.data.user);
+  const logout = async () => {
+    try {
+      await api.post("/auth/logout");
+    } catch {
+      // ignore — clear state regardless
     }
-  };
-
-  const signup = async (name: string, username: string, email: string, password: string) => {
-    const res = await api.post("/auth/signup", { name, username, email, password });
-    if (res.data?.token && res.data?.user) {
-      setSession(res.data.token, res.data.user);
-    }
-  };
-
-  const logout = () => {
-    localStorage.removeItem("cf_token");
-    setToken(null);
     setUser(null);
   };
 
@@ -51,22 +36,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const res = await api.get("/auth/me");
       setUser(res.data);
     } catch {
-      logout();
+      setUser(null);
     }
   };
 
+  // On mount: check if we have a valid session cookie
   useEffect(() => {
-    const stored = localStorage.getItem("cf_token");
-    if (!stored) { setLoading(false); return; }
-    setToken(stored);
     api.get<User>("/auth/me")
       .then((res) => setUser(res.data))
-      .catch(() => logout())
+      .catch(() => setUser(null))
       .finally(() => setLoading(false));
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, token, loading, login, signup, logout, refreshUser }}>
+    <AuthContext.Provider value={{ user, loading, login, logout, refreshUser }}>
       {children}
     </AuthContext.Provider>
   );
@@ -77,4 +60,3 @@ export const useAuth = () => {
   if (!ctx) throw new Error("useAuth must be used inside AuthProvider");
   return ctx;
 };
-

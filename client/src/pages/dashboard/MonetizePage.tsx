@@ -1,32 +1,290 @@
 import { useEffect, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus, Trash2, Check, Users, IndianRupee } from "lucide-react";
-import toast from "react-hot-toast";
+import { Lock, Link2, ExternalLink, CheckCircle2, Zap } from "lucide-react";
 import api from "@/lib/api";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import type { SubscriptionTier, EarningsSummary } from "@/types";
+import { useAuth } from "@/context/AuthContext";
+import type { Block, SubscriptionTier, User } from "@/types";
 
-export default function MonetizePage() {
-  const [tiers, setTiers] = useState<SubscriptionTier[]>([]);
-  const [earnings, setEarnings] = useState<EarningsSummary | null>(null);
-  const [showForm, setShowForm] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [form, setForm] = useState({
-    name: "", description: "", price: "", benefits: [""],
-  });
+interface CreatorPageData {
+  user: User;
+  blocks: Block[];
+  tiers: SubscriptionTier[];
+  isSubscribed: boolean;
+}
+
+const themeConfig = {
+  minimal: {
+    bg: "#ffffff", surface: "#f9f9f7", text: "#0a0a0a",
+    subtext: "#6b7280", border: "#e5e7eb",
+    linkBg: "#0a0a0a", linkText: "#ffffff", linkHover: "#1a1a1a",
+  },
+  gradient: {
+    bg: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+    surface: "rgba(255,255,255,0.1)", text: "#ffffff",
+    subtext: "rgba(255,255,255,0.7)", border: "rgba(255,255,255,0.15)",
+    linkBg: "rgba(255,255,255,0.15)", linkText: "#ffffff", linkHover: "rgba(255,255,255,0.25)",
+  },
+} as const;
+
+type Theme = (typeof themeConfig)[keyof typeof themeConfig];
+
+// ─── Block components ─────────────────────────────────────────────────────────
+const LinkBlock = ({ block, theme }: { block: Block; theme: Theme }) => {
+  const handleClick = () => {
+    api.post("/analytics/track", {
+      type: "link_click",
+      creatorId: block.userId,
+      blockId: block._id,
+    }).catch(() => {});
+  };
+
+  return (
+    <motion.a
+      href={(block.content.url as string) || "#"}
+      target="_blank"
+      rel="noopener noreferrer"
+      onClick={handleClick}
+      whileHover={{ scale: 1.01 }}
+      whileTap={{ scale: 0.98 }}
+      className="flex items-center justify-between w-full px-5 py-3.5 rounded-xl border transition-all duration-150 group"
+      style={{ background: theme.linkBg, color: theme.linkText, borderColor: theme.border }}
+    >
+      <div className="flex items-center gap-3 min-w-0">
+        <div className="w-6 h-6 rounded-md flex items-center justify-center opacity-60 shrink-0" style={{ background: theme.border }}>
+          <Link2 size={12} />
+        </div>
+        <span className="text-sm font-medium truncate">{(block.content.title as string) || "Link"}</span>
+      </div>
+      <ExternalLink size={14} className="opacity-40 group-hover:opacity-70 transition-opacity shrink-0" />
+    </motion.a>
+  );
+};
+
+const TextBlock = ({ block, theme }: { block: Block; theme: Theme }) => (
+  <p className="text-sm text-center leading-relaxed" style={{ color: theme.subtext }}>
+    {block.content.text as string}
+  </p>
+);
+
+const ImageBlock = ({ block }: { block: Block }) => {
+  const caption = block.content.caption as string | undefined;
+  return (
+    <div className="w-full rounded-xl overflow-hidden">
+      <img src={block.content.url as string} alt={caption || ""} className="w-full object-cover" />
+      {caption && <p className="text-xs text-center mt-2 opacity-60">{caption}</p>}
+    </div>
+  );
+};
+
+const VideoBlock = ({ block }: { block: Block }) => {
+  const url = (block.content.url as string) ?? "";
+  const embedUrl = url
+    .replace("watch?v=", "embed/")
+    .replace("youtu.be/", "youtube.com/embed/");
+
+  return (
+    <div className="w-full aspect-video rounded-xl overflow-hidden">
+      <iframe src={embedUrl} className="w-full h-full" allowFullScreen title="Video" />
+    </div>
+  );
+};
+
+const LockedBlock = ({ theme, onSubscribeClick }: { theme: Theme; onSubscribeClick: () => void }) => (
+  <motion.div
+    initial={{ opacity: 0 }}
+    animate={{ opacity: 1 }}
+    className="flex items-center justify-between w-full px-5 py-3.5 rounded-xl border cursor-pointer group transition-all"
+    style={{ borderColor: theme.border, background: theme.surface }}
+    onClick={onSubscribeClick}
+  >
+    <div className="flex items-center gap-3">
+      <div className="w-6 h-6 rounded-md flex items-center justify-center" style={{ background: "#f59e0b1a" }}>
+        <Lock size={12} className="text-amber-400" />
+      </div>
+      <div>
+        <p className="text-sm font-medium" style={{ color: theme.text }}>Subscribers only</p>
+        <p className="text-xs opacity-50" style={{ color: theme.subtext }}>Subscribe to unlock this content</p>
+      </div>
+    </div>
+    <span className="text-xs font-semibold text-amber-400 group-hover:translate-x-0.5 transition-transform">
+      Unlock →
+    </span>
+  </motion.div>
+);
+
+// ─── Subscribe modal ──────────────────────────────────────────────────────────
+const SubscribeModal = ({
+  tiers, creatorName, onClose, onSuccess,
+}: {
+  tiers: SubscriptionTier[];
+  creatorName: string;
+  onClose: () => void;
+  onSuccess: () => void;
+}) => {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState<string | null>(null);
+
+  const handleSubscribe = async (tier: SubscriptionTier) => {
+    if (!user) { navigate("/login"); return; }
+
+    setLoading(tier._id);
+    try {
+      const res = await api.post("/subscriptions", { tierId: tier._id });
+      const { subscriptionId, keyId } = res.data;
+
+      const script = document.createElement("script");
+      script.src = "https://checkout.razorpay.com/v1/checkout.js";
+      document.body.appendChild(script);
+
+      script.onload = () => {
+        const rzp = new (window as any).Razorpay({
+          key: keyId,
+          subscription_id: subscriptionId,
+          name: "CreatorForge",
+          description: `${tier.name} — ${creatorName}`,
+          handler: async (response: any) => {
+            await api.post("/subscriptions/verify", {
+              razorpaySubscriptionId: response.razorpay_subscription_id,
+              razorpayPaymentId:      response.razorpay_payment_id,
+              razorpaySignature:      response.razorpay_signature,
+              tierId: tier._id,
+            });
+            onSuccess();
+          },
+          modal: { ondismiss: () => setLoading(null) },
+        });
+        rzp.open();
+      };
+    } catch (err: any) {
+      alert(err.response?.data?.message ?? "Failed to start checkout");
+      setLoading(null);
+    }
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4"
+      style={{ background: "rgba(0,0,0,0.75)" }}
+      onClick={onClose}
+    >
+      <motion.div
+        initial={{ y: 40, opacity: 0, scale: 0.97 }}
+        animate={{ y: 0, opacity: 1, scale: 1 }}
+        exit={{ y: 20, opacity: 0, scale: 0.97 }}
+        transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+        className="w-full max-w-md rounded-2xl overflow-hidden"
+        style={{ background: "#111318", border: "1px solid #1f2330" }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="px-6 py-5 border-b" style={{ borderColor: "#1f2330" }}>
+          <div className="flex items-center gap-2 mb-0.5">
+            <Zap size={15} className="text-amber-400" />
+            <h3 className="font-display font-bold text-white">Support {creatorName}</h3>
+          </div>
+          <p className="text-sm" style={{ color: "#8a8f9e" }}>
+            Choose a tier to unlock exclusive content
+          </p>
+        </div>
+
+        <div className="p-4 flex flex-col gap-3">
+          {tiers.map((tier) => (
+            <motion.button
+              key={tier._id}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => handleSubscribe(tier)}
+              disabled={!!loading}
+              className="flex items-start justify-between w-full p-4 rounded-xl border text-left transition-all hover:border-amber-500/30"
+              style={{ borderColor: "#2d3344", background: "#1a1d24" }}
+            >
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-sm font-semibold text-white">{tier.name}</span>
+                  {loading === tier._id && (
+                    <span className="w-3.5 h-3.5 border-2 border-amber-400 border-t-transparent rounded-full animate-spin" />
+                  )}
+                </div>
+                {tier.description && (
+                  <p className="text-xs mb-2" style={{ color: "#8a8f9e" }}>{tier.description}</p>
+                )}
+                {tier.benefits.length > 0 && (
+                  <ul className="flex flex-col gap-1">
+                    {tier.benefits.map((b, i) => (
+                      <li key={i} className="flex items-center gap-1.5 text-xs" style={{ color: "#8a8f9e" }}>
+                        <CheckCircle2 size={11} className="text-amber-400 shrink-0" />
+                        {b}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+              <div className="ml-4 shrink-0 text-right">
+                <span className="text-sm font-bold text-amber-400">
+                  ₹{(tier.price / 100).toLocaleString("en-IN")}
+                </span>
+                <span className="text-xs block" style={{ color: "#8a8f9e" }}>/month</span>
+              </div>
+            </motion.button>
+          ))}
+        </div>
+
+        <div className="px-4 pb-4">
+          <button
+            onClick={onClose}
+            className="w-full py-2.5 text-sm rounded-xl transition-colors hover:bg-white/5"
+            style={{ color: "#8a8f9e" }}
+          >
+            Maybe later
+          </button>
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+};
+
+// ─── Loading skeleton ─────────────────────────────────────────────────────────
+const PageSkeleton = () => (
+  <div className="min-h-screen bg-[#0a0b0f] py-16 px-4">
+    <div className="max-w-[480px] mx-auto flex flex-col items-center gap-4">
+      <div className="w-20 h-20 rounded-full skeleton" />
+      <div className="w-32 h-5 skeleton rounded" />
+      <div className="w-24 h-3 skeleton rounded" />
+      <div className="w-48 h-3 skeleton rounded mt-1" />
+      <div className="w-full flex flex-col gap-3 mt-4">
+        {[1, 2, 3].map((i) => (
+          <div key={i} className="w-full h-12 skeleton rounded-xl" />
+        ))}
+      </div>
+    </div>
+  </div>
+);
+
+// ─── Main page ────────────────────────────────────────────────────────────────
+export default function CreatorPage() {
+  const { username } = useParams<{ username: string }>();
+  const [data, setData]         = useState<CreatorPageData | null>(null);
+  const [loading, setLoading]   = useState(true);
+  const [notFound, setNotFound] = useState(false);
+  const [showModal, setShowModal] = useState(false);
 
   const load = async () => {
     try {
-      const [t, e] = await Promise.all([
-        api.get("/tiers/mine"),
-        api.get("/subscriptions/earnings"),
-      ]);
-      setTiers(t.data);
-      setEarnings(e.data);
-    } catch {
-      toast.error("Failed to load");
+      const res = await api.get(`/public/${username}`);
+      setData(res.data);
+
+      // Update page title for SEO / tab label
+      document.title = `${res.data.user.name} (@${res.data.user.username}) — CreatorForge`;
+
+      api.post("/analytics/track", {
+        type: "page_view",
+        creatorId: res.data.user._id,
+      }).catch(() => {});
+    } catch (err: any) {
+      if (err.response?.status === 404) setNotFound(true);
     } finally {
       setLoading(false);
     }
@@ -34,246 +292,167 @@ export default function MonetizePage() {
 
   useEffect(() => {
     load();
-  }, []);
+    return () => { document.title = "CreatorForge — Monetize Your Audience"; };
+  }, [username]);
 
-  const addBenefit = () => setForm({ ...form, benefits: [...form.benefits, ""] });
-  const updateBenefit = (i: number, val: string) => {
-    const b = [...form.benefits];
-    b[i] = val;
-    setForm({ ...form, benefits: b });
-  };
-  const removeBenefit = (i: number) => setForm({
-    ...form, benefits: form.benefits.filter((_, idx) => idx !== i),
-  });
+  if (loading) return <PageSkeleton />;
 
-  const handleCreate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const priceRs = parseFloat(form.price);
-    if (isNaN(priceRs) || priceRs < 1) {
-      toast.error("Enter a valid price (min INR 1)");
-      return;
-    }
-    setSaving(true);
-    try {
-      await api.post("/tiers", {
-        name: form.name,
-        description: form.description,
-        price: Math.round(priceRs * 100),
-        benefits: form.benefits.filter(Boolean),
-      });
-      toast.success("Tier created!");
-      setForm({ name: "", description: "", price: "", benefits: [""] });
-      setShowForm(false);
-      load();
-    } catch (err: any) {
-      toast.error(err.response?.data?.message ?? "Failed to create tier");
-    } finally {
-      setSaving(false);
-    }
-  };
+  if (notFound || !data) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-[#0a0b0f] gap-4 px-4">
+        <div className="w-16 h-16 rounded-2xl bg-[#1a1d24] border border-[#1f2330] flex items-center justify-center mb-2">
+          <span className="font-display text-2xl font-bold text-[#4a4f5e]">?</span>
+        </div>
+        <p className="font-display text-2xl font-bold text-white">Page not found</p>
+        <p className="text-[#8a8f9e] text-sm text-center max-w-xs">
+          The creator @{username} doesn't exist or their page is unavailable.
+        </p>
+        
+          href="/"
+          className="mt-2 px-5 py-2.5 rounded-lg bg-[#f59e0b] text-[#0a0b0f] text-sm font-semibold hover:bg-[#fbbf24] transition-colors"
+        <a
+          href="/"
+          className="mt-2 px-5 py-2.5 rounded-lg bg-[#f59e0b] text-[#0a0a0b] text-sm font-semibold hover:bg-[#fbbf24] transition-colors"
+        >
+          Go home
+        </a>
+      </div>
+    );
+  }
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("Delete this tier?")) return;
-    try {
-      await api.delete(`/tiers/${id}`);
-      toast.success("Tier deleted");
-      setTiers(tiers.filter((t) => t._id !== id));
-    } catch {
-      toast.error("Failed to delete");
-    }
-  };
-
-  const fmtRs = (paise: number) => `₹ ${(paise / 100).toLocaleString("en-IN")}`;
+  const { user, blocks, tiers, isSubscribed } = data;
+  const theme     = themeConfig[(user.theme as keyof typeof themeConfig) || "minimal"];
+  const isGradient = user.theme === "gradient";
+  const hasTiers   = tiers.length > 0;
 
   return (
-    <div className="flex flex-col gap-8 text-[var(--text-primary)]">
-      <div className="flex items-start justify-between">
-        <div>
-          <h1 className="font-display text-2xl font-bold text-[var(--text-primary)] tracking-tight">Monetize</h1>
-          <p className="text-sm font-semibold text-[var(--text-secondary)] mt-1">
-            Create subscription tiers for your audience
-          </p>
+    <>
+      <div className="min-h-screen py-14 px-4 pb-28" style={{ background: theme.bg, color: theme.text }}>
+        <div className="max-w-[480px] mx-auto flex flex-col gap-4">
+
+          {/* Profile header */}
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4 }}
+            className="text-center mb-2"
+          >
+            <div
+              className="w-20 h-20 rounded-full mx-auto mb-4 overflow-hidden flex items-center justify-center text-xl font-bold border-2"
+              style={{
+                background:  isGradient ? "rgba(255,255,255,0.2)" : theme.surface,
+                borderColor: theme.border,
+                color:       theme.text,
+              }}
+            >
+              {user.avatar
+                ? <img src={user.avatar} alt={user.name} className="w-full h-full object-cover" />
+                : <span>{user.name[0]?.toUpperCase()}</span>
+              }
+            </div>
+
+            <h1 className="font-display text-xl font-bold mb-1" style={{ color: theme.text }}>
+              {user.name}
+            </h1>
+            <p className="text-sm opacity-60 mb-2" style={{ color: theme.subtext }}>
+              @{user.username}
+            </p>
+
+            {user.bio && (
+              <p className="text-sm leading-relaxed max-w-xs mx-auto" style={{ color: theme.subtext }}>
+                {user.bio}
+              </p>
+            )}
+
+            {isSubscribed && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="inline-flex items-center gap-1.5 mt-3 px-3 py-1 rounded-full text-xs font-medium"
+                style={{ background: "#f59e0b1a", color: "#f59e0b" }}
+              >
+                <CheckCircle2 size={12} />
+                Subscribed
+              </motion.div>
+            )}
+          </motion.div>
+
+          {/* Blocks */}
+          <div className="flex flex-col gap-3">
+            {blocks.map((block, i) => (
+              <motion.div
+                key={block._id}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, delay: 0.1 + i * 0.05 }}
+              >
+                {block.type === "link" && <LinkBlock block={block} theme={theme} />}
+                {block.type === "text" && <TextBlock block={block} theme={theme} />}
+                {block.type === "image" && <ImageBlock block={block} />}
+                {block.type === "video" && <VideoBlock block={block} />}
+                {block.type === "paid_post" && (
+                  <div className="rounded-xl border p-5" style={{ borderColor: theme.border, background: theme.surface }}>
+                    <h3 className="text-sm font-semibold mb-2" style={{ color: theme.text }}>
+                      {(block.content.title as string) || "Exclusive post"}
+                    </h3>
+                    <p className="text-sm leading-relaxed" style={{ color: theme.subtext }}>
+                      {block.content.text as string}
+                    </p>
+                  </div>
+                )}
+                {block.type === "locked" && (
+                  <LockedBlock theme={theme} onSubscribeClick={() => setShowModal(true)} />
+                )}
+              </motion.div>
+            ))}
+          </div>
+
+          {/* Powered by */}
+          <div className="text-center mt-6">
+            <a
+              href="/"
+              className="inline-flex items-center gap-1.5 text-xs transition-opacity hover:opacity-60"
+              style={{ color: theme.subtext, opacity: 0.35 }}
+            >
+              <Zap size={10} />
+              CreatorForge
+            </a>
+          </div>
         </div>
-        <button
-          onClick={() => setShowForm(!showForm)}
-          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-colors shadow-[var(--shadow-sm)] ${
-            showForm ? "bg-[var(--bg-elevated)] text-[var(--text-primary)] hover:bg-[var(--bg-hover)]" : "bg-[var(--accent)] text-[var(--text-inverse)] hover:bg-[var(--accent-hover)]"
-          }`}
-        >
-          <Plus size={16} />
-          New tier
-        </button>
       </div>
 
-      {/* Earnings summary */}
-      {earnings && (
-        <div className="grid grid-cols-2 gap-4">
-          <div className="bg-[var(--bg-surface)] p-6 rounded-xl border border-[var(--border)] shadow-[var(--shadow-sm)] flex items-center gap-4">
-            <div className="w-12 h-12 rounded-full bg-[var(--accent-muted)] flex items-center justify-center">
-              <Users size={20} className="text-[var(--accent)]" />
-            </div>
-            <div>
-              <p className="text-sm font-semibold text-[var(--text-secondary)]">Active subscribers</p>
-              <p className="font-display text-2xl font-bold text-[var(--text-primary)] tracking-tight">
-                {earnings.totalSubscribers}
-              </p>
-            </div>
+      {/* Sticky subscribe button — only shows if has tiers and not subscribed */}
+      {hasTiers && !isSubscribed && (
+        <motion.div
+          initial={{ y: 80, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.5, type: "spring", damping: 22, stiffness: 200 }}
+          className="fixed bottom-0 inset-x-0 p-4 z-40"
+          style={{ background: `linear-gradient(to top, ${isGradient ? "rgba(0,0,0,0.5)" : theme.bg}, transparent)` }}
+        >
+          <div className="max-w-[480px] mx-auto">
+            <button
+              onClick={() => setShowModal(true)}
+              className="w-full py-3.5 rounded-xl text-sm font-bold transition-all hover:opacity-90 shadow-lg"
+              style={{ background: "#f59e0b", color: "#0a0b0f" }}
+            >
+              Subscribe to {user.name.split(" ")[0]} · from ₹{(Math.min(...tiers.map(t => t.price)) / 100).toLocaleString("en-IN")}/mo
+            </button>
           </div>
-          <div className="bg-[var(--accent)] p-6 rounded-xl border border-[var(--accent-border)] shadow-[var(--shadow-accent)] flex items-center gap-4">
-            <div className="w-12 h-12 rounded-full bg-[var(--text-inverse)]/10 flex items-center justify-center">
-              <IndianRupee size={20} className="text-[var(--text-inverse)]" />
-            </div>
-            <div>
-              <p className="text-sm font-semibold text-[var(--text-inverse)]/80">Monthly recurring</p>
-              <p className="font-display text-2xl font-bold text-[var(--text-inverse)] tracking-tight">
-                {fmtRs(earnings.mrr)}
-              </p>
-            </div>
-          </div>
-        </div>
+        </motion.div>
       )}
 
-      {/* Create form */}
+      {/* Subscribe modal */}
       <AnimatePresence>
-        {showForm && (
-          <motion.div
-             initial={{ opacity: 0, height: 0 }}
-             animate={{ opacity: 1, height: "auto" }}
-             exit={{ opacity: 0, height: 0 }}
-             transition={{ duration: 0.2 }}
-             className="overflow-hidden"
-          >
-            <div className="bg-[var(--bg-surface)] p-6 rounded-xl border border-[var(--border)] shadow-[var(--shadow-sm)] mb-4">
-              <h3 className="font-display text-lg font-bold text-[var(--text-primary)] mb-5">
-                Create tier
-              </h3>
-              <form onSubmit={handleCreate} className="flex flex-col gap-5">
-                <div className="grid grid-cols-2 gap-5">
-                  <Input label="Tier name" placeholder="VIP Members"
-                    value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })}
-                    required />
-                  <Input label="Price (INR/month)" type="number" placeholder="499"
-                    value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })}
-                    hint="Minimum ₹ 1" required />
-                </div>
-                <Input label="Description" placeholder="Access to exclusive behind-the-scenes content..."
-                  value={form.description}
-                  onChange={(e) => setForm({ ...form, description: e.target.value })}
-                  />
-
-                {/* Benefits */}
-                <div className="flex flex-col gap-3">
-                  <label className="text-sm font-bold text-[var(--text-secondary)]">
-                    Benefits
-                  </label>
-                  {form.benefits.map((b, i) => (
-                    <div key={i} className="flex gap-2">
-                      <input
-                        value={b}
-                        onChange={(e) => updateBenefit(i, e.target.value)}
-                        placeholder={`Benefit ${i + 1}`}
-                        className="flex-1 px-3 py-2.5 text-sm bg-[var(--bg-surface)] text-[var(--text-primary)] border border-[var(--border)] rounded-lg placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/20 transition-all font-medium"
-                      />
-                      {form.benefits.length > 1 && (
-                        <button type="button" onClick={() => removeBenefit(i)}
-                          className="text-[var(--text-muted)] hover:text-[var(--danger)] transition-colors px-2">
-                          <Trash2 size={16} />
-                        </button>
-                      )}
-                    </div>
-                  ))}
-                  <button type="button" onClick={addBenefit}
-                    className="text-sm font-bold text-[var(--text-secondary)] hover:text-[var(--text-primary)] self-start mt-1">
-                    + Add benefit
-                  </button>
-                </div>
-
-                <div className="flex gap-3 pt-4 border-t border-[var(--border)] mt-2">
-                   <button
-                    type="submit"
-                    disabled={saving}
-                    className="bg-[var(--accent)] text-[var(--text-inverse)] px-5 py-2.5 rounded-lg text-sm font-bold hover:bg-[var(--accent-hover)] transition shadow-[var(--shadow-sm)] disabled:opacity-50"
-                  >
-                    {saving ? "Creating..." : "Create tier"}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setShowForm(false)}
-                    className="bg-[var(--bg-elevated)] text-[var(--text-primary)] px-5 py-2.5 rounded-lg text-sm font-bold hover:bg-[var(--bg-hover)] transition"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </form>
-            </div>
-          </motion.div>
+        {showModal && (
+          <SubscribeModal
+            tiers={tiers}
+            creatorName={user.name}
+            onClose={() => setShowModal(false)}
+            onSuccess={() => { setShowModal(false); load(); }}
+          />
         )}
       </AnimatePresence>
-
-      {/* Tiers list */}
-      {loading ? (
-        <div className="flex justify-center py-12">
-           <span className="w-6 h-6 border-2 border-[var(--accent)] border-t-transparent rounded-full animate-spin" />
-        </div>
-      ) : tiers.length === 0 ? (
-        <div className="bg-[var(--bg-base)] border border-dashed border-[var(--border-strong)] rounded-xl text-center py-16">
-          <div className="w-12 h-12 bg-[var(--bg-surface)] rounded-full flex items-center justify-center mx-auto mb-3 shadow-[var(--shadow-sm)] border border-[var(--border)]">
-            <IndianRupee size={20} className="text-[var(--text-muted)]" />
-          </div>
-          <p className="text-[var(--text-primary)] font-bold text-base">No tiers found</p>
-          <p className="text-[var(--text-secondary)] font-medium text-sm mt-1">
-            Create your first subscription tier to start monetizing.
-          </p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
-          {tiers.map((tier, i) => (
-            <motion.div key={tier._id}
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.05 }}
-              className="bg-[var(--bg-surface)] p-6 rounded-xl border border-[var(--border)] shadow-[var(--shadow-sm)] flex flex-col h-full hover:shadow-[var(--shadow-md)] hover:border-[var(--border-strong)] transition-all cursor-default"
-            >
-              <div className="flex items-start justify-between mb-2">
-                 <h3 className="font-display text-xl font-bold text-[var(--text-primary)] tracking-tight">
-                  {tier.name}
-                </h3>
-              </div>
-              {tier.description && (
-                <p className="text-sm font-medium text-[var(--text-secondary)] mb-2 line-clamp-2">
-                  {tier.description}
-                </p>
-              )}
-              
-              <div className="my-4 pb-4 border-b border-[var(--border-subtle)]">
-                <span className="font-display text-3xl font-bold text-[var(--text-primary)]">{fmtRs(tier.price)}</span>
-                <span className="text-sm font-semibold text-[var(--text-muted)] ml-1">/mo</span>
-              </div>
-
-              {tier.benefits.length > 0 && (
-                <ul className="flex flex-col gap-2.5 mb-6">
-                  {tier.benefits.map((b, j) => (
-                    <li key={j} className="flex items-start gap-2.5 text-sm font-semibold text-[var(--text-primary)]">
-                      <Check size={16} className="text-[var(--success)] shrink-0 mt-0.5 font-bold" />
-                      {b}
-                    </li>
-                  ))}
-                </ul>
-              )}
-
-              <div className="flex items-center gap-3 mt-auto pt-4 border-t border-[var(--border-subtle)]">
-                <span className={`text-xs font-bold uppercase tracking-wider px-2.5 py-1 rounded-md ${tier.active ? 'bg-[var(--success)]/10 text-[var(--success)]' : 'bg-[var(--danger)]/10 text-[var(--danger)]'}`}>
-                  {tier.active ? "Active" : "Inactive"}
-                </span>
-                <button onClick={() => handleDelete(tier._id)}
-                  className="ml-auto text-[var(--text-muted)] hover:text-[var(--danger)] transition-colors p-1" title="Delete tier">
-                  <Trash2 size={16} />
-                </button>
-              </div>
-            </motion.div>
-          ))}
-        </div>
-      )}
-    </div>
+    </>
   );
 }

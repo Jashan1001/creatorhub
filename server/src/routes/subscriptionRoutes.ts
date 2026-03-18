@@ -2,6 +2,7 @@ import { Router } from "express";
 import {
   createSubscription,
   verifyPayment,
+  cancelSubscription,
   getMySubscriptions,
   getMySubscribers,
   getEarningsSummary,
@@ -14,10 +15,11 @@ const router = Router();
 
 router.use(authMiddleware);
 
-router.post("/", validate(createSubscriptionSchema), createSubscription);
-router.post("/verify", validate(verifyPaymentSchema), verifyPayment);
-router.get("/mine", getMySubscriptions);
-router.get("/subscribers", getMySubscribers);
-router.get("/earnings", getEarningsSummary);
+router.post("/",             validate(createSubscriptionSchema), createSubscription);
+router.post("/verify",       validate(verifyPaymentSchema),      verifyPayment);
+router.delete("/:id/cancel", cancelSubscription);
+router.get("/mine",          getMySubscriptions);
+router.get("/subscribers",   getMySubscribers);
+router.get("/earnings",      getEarningsSummary);
 
 export default router;

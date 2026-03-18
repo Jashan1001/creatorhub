@@ -3,25 +3,14 @@ import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { motion, useInView } from "framer-motion";
 import {
-  Zap,
-  Layout,
-  BarChart2,
-  DollarSign,
-  ArrowRight,
-  Check,
-  Smartphone,
-  Globe,
-  Share2,
+  Zap, Link2, Lock, BarChart2, DollarSign,
+  ArrowRight, Check, ChevronRight, Users, TrendingUp,
 } from "lucide-react";
 
 const FadeIn = ({
-  children,
-  delay = 0,
-  className = "",
+  children, delay = 0, className = "",
 }: {
-  children: ReactNode;
-  delay?: number;
-  className?: string;
+  children: ReactNode; delay?: number; className?: string;
 }) => {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-60px" });
@@ -39,169 +28,227 @@ const FadeIn = ({
 };
 
 const Navbar = () => (
-  <nav className="fixed top-0 inset-x-0 z-50 h-16 flex items-center border-b border-[var(--border)] bg-[var(--bg-base)]/80 backdrop-blur-md">
+  <nav className="fixed top-0 inset-x-0 z-50 h-16 flex items-center border-b border-(--border) bg-(--bg-base)/80 backdrop-blur-md">
     <div className="max-w-6xl mx-auto px-6 w-full flex items-center justify-between">
       <div className="flex items-center gap-2">
-        <div className="w-8 h-8 rounded-lg bg-[var(--accent)] flex items-center justify-center shadow-[var(--shadow-sm)]">
-          <Zap size={16} className="text-[var(--text-inverse)]" />
+        <div className="w-7 h-7 rounded-md bg-accent flex items-center justify-center shadow-(--shadow-accent)">
+          <Zap size={13} className="text-(--text-inverse)" />
         </div>
-        <span className="font-display font-bold text-[var(--text-primary)] tracking-tight text-lg">
-          CreatorHub
-        </span>
+        <span className="font-display font-bold text-(--text-primary) tracking-tight">CreatorForge</span>
       </div>
-      <div className="flex items-center gap-4">
-        <Link
-          to="/login"
-          className="text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
-        >
-          Log in
+      <div className="flex items-center gap-3">
+        <Link to="/login" className="text-sm text-(--text-secondary) hover:text-(--text-primary) transition-colors px-3 py-1.5">
+          Sign in
         </Link>
-        <Link
-          to="/signup"
-          className="text-sm font-medium px-4 py-2 rounded-lg bg-[var(--accent)] text-[var(--text-inverse)] hover:bg-[var(--accent-hover)] transition-colors shadow-[var(--shadow-sm)]"
-        >
-          Sign up free
+        <Link to="/signup" className="text-sm font-semibold px-4 py-2 rounded-lg bg-accent text-(--text-inverse) hover:bg-(--accent-hover) transition-all shadow-(--shadow-accent)">
+          Get started
         </Link>
       </div>
     </div>
   </nav>
 );
 
+// ── Social proof numbers ───────────────────────────────────────────────────────
+const stats = [
+  { icon: Users, value: "2,400+", label: "Creators" },
+  { icon: TrendingUp, value: "₹18L+", label: "Earned" },
+  { icon: DollarSign, value: "4.9★", label: "Rating" },
+];
+
 const Hero = () => (
-  <section className="pt-40 pb-24 px-6 md:px-12 text-center relative overflow-hidden bg-[var(--bg-base)]">
+  <section className="pt-40 pb-20 px-6 text-center relative overflow-hidden">
+    {/* Glow orb */}
     <div
-      className="absolute top-20 left-1/2 -translate-x-1/2 w-[650px] h-[320px] rounded-full opacity-[0.06] blur-3xl pointer-events-none"
-      style={{ background: "radial-gradient(ellipse, #A05C3E, transparent)" }}
+      className="absolute top-24 left-1/2 -translate-x-1/2 w-[700px] h-[320px] rounded-full opacity-[0.055] blur-3xl pointer-events-none"
+      style={{ background: "radial-gradient(ellipse, #f59e0b, #f97316, transparent)" }}
     />
 
-    <div className="max-w-4xl mx-auto relative z-10">
+    <div className="max-w-4xl mx-auto relative">
       <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.5 }}
-        className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-[var(--accent-border)] bg-[var(--accent-muted)] shadow-[var(--shadow-sm)] text-xs font-semibold text-[var(--accent)] mb-8"
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+        className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-(--accent-border) bg-(--accent-muted) text-xs font-medium text-accent mb-8"
       >
-        <span className="w-2 h-2 rounded-full bg-[var(--success)] animate-pulse" />
-        Version 2.0 is now live
+        <span className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
+        Now live · built for Indian creators
       </motion.div>
 
       <motion.h1
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.1 }}
-        className="font-display text-5xl md:text-6xl lg:text-[72px] font-extrabold text-[var(--text-primary)] leading-[1.1] tracking-tight mb-6"
+        className="font-display text-5xl sm:text-6xl lg:text-7xl font-bold text-(--text-primary) leading-[1.05] tracking-tight mb-6"
       >
-        Your Entire Creator World
+        Your audience.
         <br />
-        <span className="block mt-2 text-[var(--accent)]">In One Link.</span>
+        <span className="gradient-text">Your revenue.</span>
       </motion.h1>
 
       <motion.p
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.2 }}
-        className="text-lg md:text-xl text-[var(--text-secondary)] max-w-2xl mx-auto leading-relaxed mb-10 font-medium"
+        className="text-lg sm:text-xl text-(--text-secondary) max-w-2xl mx-auto leading-relaxed mb-10"
       >
-        A single, beautiful profile to house everything you create, sell, and share. Claim your unique link and start building your audience.
+        Build a customizable creator page, set subscription tiers, gate premium
+        content, and track your audience — all from one dashboard.
       </motion.p>
 
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.3 }}
-        className="flex flex-col sm:flex-row items-center justify-center gap-4"
+        className="flex items-center justify-center gap-4 flex-wrap mb-16"
       >
         <Link
           to="/signup"
-          className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl bg-[var(--accent)] text-[var(--text-inverse)] font-semibold text-base hover:bg-[var(--accent-hover)] transition-all shadow-[var(--shadow-md)] hover:shadow-[var(--shadow-accent)]"
+          className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl bg-accent text-(--text-inverse) font-bold text-sm hover:bg-(--accent-hover) transition-all shadow-[0_0_28px_rgba(245,158,11,0.35)] hover:shadow-[0_0_40px_rgba(245,158,11,0.45)]"
         >
-          Claim your link
-          <ArrowRight size={18} />
+          Start for free
+          <ArrowRight size={16} />
         </Link>
-        <div className="text-sm font-medium text-[var(--text-muted)]">
-          creatorhub.co/<span className="text-[var(--text-primary)]">yourname</span>
-        </div>
+        <Link
+          to="/login"
+          className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl border border-(--border) text-(--text-secondary) text-sm hover:border-(--border-strong) hover:text-(--text-primary) transition-all"
+        >
+          Sign in
+          <ChevronRight size={16} />
+        </Link>
+      </motion.div>
+
+      {/* Social proof */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.5 }}
+        className="flex items-center justify-center gap-8 flex-wrap"
+      >
+        {stats.map(({ icon: Icon, value, label }) => (
+          <div key={label} className="flex items-center gap-2 text-(--text-muted)">
+            <Icon size={14} className="text-accent" />
+            <span className="text-sm font-semibold text-(--text-primary)">{value}</span>
+            <span className="text-xs">{label}</span>
+          </div>
+        ))}
       </motion.div>
     </div>
   </section>
 );
 
-const Problem = () => (
-  <section className="py-24 px-6 md:px-12 bg-[var(--bg-surface)] border-y border-[var(--border)]">
-    <div className="max-w-6xl mx-auto">
-      <FadeIn className="text-center mb-16">
-         <h2 className="font-display text-3xl md:text-4xl font-bold text-[var(--text-primary)] tracking-tight mb-4">
-          Creators Are Everywhere.
-        </h2>
-        <p className="text-lg text-[var(--text-secondary)] max-w-2xl mx-auto font-medium">
-          You have YouTube videos, tweets, Instagram posts, a newsletter, and courses. Directing your audience to just one place is impossible without a central hub.
-        </p>
-      </FadeIn>
-      
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        {[
-           { icon: Globe, title: "Scattered Audience", desc: "Your followers are spread across multiple networks with no single way to find all your work." },
-           { icon: Share2, title: "One Link Limit", desc: "Social platforms only give you one bio link. Make it count by linking to a unified landing page." },
-           { icon: DollarSign, title: "Lost Revenue", desc: "If they can't easily find your products, sponsors, or premium content—you're leaving money on the table." }
-        ].map((item, i) => (
-           <FadeIn key={i} delay={i * 0.1}>
-             <div className="bg-[var(--bg-base)] p-8 rounded-2xl border border-[var(--border)] h-full flex flex-col items-center text-center">
-               <div className="w-14 h-14 bg-[var(--bg-surface)] rounded-full flex items-center justify-center shadow-[var(--shadow-sm)] border border-[var(--border)] mb-6 text-[var(--accent)]">
-                 <item.icon size={24} />
-               </div>
-               <h3 className="font-display text-xl font-bold text-[var(--text-primary)] mb-3">{item.title}</h3>
-               <p className="text-[var(--text-secondary)] font-medium leading-relaxed">{item.desc}</p>
-             </div>
-           </FadeIn>
-        ))}
+const PagePreview = () => (
+  <FadeIn className="max-w-5xl mx-auto px-6 mb-28">
+    <div className="rounded-2xl border border-(--border) overflow-hidden bg-(--bg-surface) shadow-(--shadow-lg)">
+      {/* Browser chrome */}
+      <div className="h-10 flex items-center gap-2 px-4 border-b border-(--border) bg-(--bg-elevated)">
+        <div className="flex items-center gap-1.5">
+          {["#ef4444", "#f59e0b", "#10b981"].map((c) => (
+            <div key={c} className="w-2.5 h-2.5 rounded-full" style={{ background: c }} />
+          ))}
+        </div>
+        <div className="flex-1 mx-4 h-5 rounded-md bg-(--bg-surface) flex items-center px-3">
+          <span className="text-xs text-(--text-muted)">creatorforge.io/@priya</span>
+        </div>
+      </div>
+
+      <div className="p-8 flex gap-8">
+        {/* Creator page preview */}
+        <div className="flex-1 flex flex-col items-center gap-3 py-4">
+          <div className="w-14 h-14 rounded-full bg-(--bg-elevated) border-2 border-(--accent-border) flex items-center justify-center font-display text-lg font-bold text-accent">
+            P
+          </div>
+          <div className="text-center">
+            <div className="font-display font-bold text-(--text-primary) text-sm">Priya Sharma</div>
+            <div className="text-xs text-(--text-muted) mt-0.5">@priya · Artist & Creator</div>
+          </div>
+
+          <div className="w-full max-w-[240px] flex flex-col gap-2 mt-1">
+            {[
+              { label: "My Portfolio", locked: false },
+              { label: "YouTube Channel", locked: false },
+              { label: "Exclusive Art Packs", locked: true },
+              { label: "Live Session Recordings", locked: true },
+            ].map((item) => (
+              <div
+                key={item.label}
+                className="flex items-center justify-between px-3 py-2 rounded-lg text-xs border"
+                style={{
+                  background:  item.locked ? "var(--accent-muted)" : "var(--bg-elevated)",
+                  borderColor: item.locked ? "var(--accent-border)" : "var(--border)",
+                  color:       item.locked ? "var(--accent)" : "var(--text-primary)",
+                }}
+              >
+                <span className="font-medium truncate">{item.label}</span>
+                {item.locked && <Lock size={10} className="shrink-0 ml-2" />}
+              </div>
+            ))}
+          </div>
+
+          <button className="mt-1 w-full max-w-[240px] py-2 rounded-lg text-xs font-bold text-(--text-inverse) bg-accent hover:bg-(--accent-hover) transition-colors shadow-(--shadow-accent)">
+            Subscribe · ₹299/mo
+          </button>
+        </div>
+
+        {/* Dashboard preview */}
+        <div className="w-60 shrink-0 flex flex-col gap-3">
+          <div className="text-xs font-medium text-(--text-muted) mb-1 uppercase tracking-wider">Dashboard</div>
+          <div className="grid grid-cols-2 gap-2">
+            {[
+              { label: "Views", value: "4.1k" },
+              { label: "Clicks", value: "1.2k" },
+              { label: "Subs", value: "83" },
+              { label: "MRR", value: "₹24.8k" },
+            ].map((s) => (
+              <div key={s.label} className="bg-(--bg-elevated) rounded-lg p-2.5 border border-(--border)">
+                <div className="text-xs text-(--text-muted)">{s.label}</div>
+                <div className="font-display font-bold text-sm text-(--text-primary) mt-0.5">{s.value}</div>
+              </div>
+            ))}
+          </div>
+          <div className="bg-(--bg-elevated) rounded-lg p-3 border border-(--border)">
+            <div className="text-xs text-(--text-muted) mb-2">Last 7 days</div>
+            <div className="flex items-end gap-0.5 h-10">
+              {[35, 58, 42, 75, 50, 88, 65].map((h, i) => (
+                <div key={i} className="flex-1 bg-(--accent-muted) hover:bg-accent rounded-sm transition-colors" style={{ height: `${h}%` }} />
+              ))}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
-  </section>
+  </FadeIn>
 );
 
+const features = [
+  { icon: Link2,      title: "Page builder",       desc: "Drag-and-drop blocks — links, text, images, videos. Reorder in seconds." },
+  { icon: Lock,       title: "Content gating",     desc: "Lock any block behind a subscription tier. Free visitors see a teaser, subscribers see everything." },
+  { icon: DollarSign, title: "Subscription tiers", desc: "Create multiple tiers with custom pricing and benefits. Powered by Razorpay." },
+  { icon: BarChart2,  title: "Real analytics",     desc: "Page views, link clicks, device breakdown, top links, referrers. 90-day window." },
+];
+
 const Features = () => (
-  <section className="py-32 px-6 md:px-12 bg-[var(--bg-base)] relative">
+  <section className="py-24 px-6 border-t border-(--border)">
     <div className="max-w-6xl mx-auto">
-      <FadeIn className="text-center mb-20">
-        <h2 className="font-display text-3xl sm:text-4xl font-bold text-[var(--text-primary)] tracking-tight mb-5">
-          Everything You Need In One Place.
+      <FadeIn className="text-center mb-16">
+        <h2 className="font-display text-3xl sm:text-4xl font-bold text-(--text-primary) mb-4">
+          Everything you need to monetize
         </h2>
-        <p className="text-lg text-[var(--text-secondary)] max-w-2xl mx-auto font-medium">
-          Stop duct-taping five tools together. CreatorHub provides the ultimate link-in-bio page, integrated with powerful building and analytics modules.
+        <p className="text-(--text-secondary) max-w-xl mx-auto">
+          Stop duct-taping five tools together. CreatorForge is the single platform
+          for your page, your subscriptions, and your analytics.
         </p>
       </FadeIn>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {[
-          {
-            icon: Layout,
-            title: "Drag & Drop Builder",
-            desc: "Construct beautiful pages in seconds. Add links, text, embedded videos, and images with an intuitive two-panel interface.",
-          },
-          {
-            icon: Smartphone,
-            title: "Mobile Optimized",
-            desc: "Designed ground-up for mobile devices. Your profile looks incredible and loads blazingly fast on every screen size.",
-          },
-          {
-            icon: BarChart2,
-            title: "In-depth Analytics",
-            desc: "Track page views, individual link clicks, and device breakdowns to understand exactly what your audience wants.",
-          },
-          {
-            icon: DollarSign,
-            title: "Seamless Monetization",
-            desc: "Offer subscription tiers directly from your profile. Gate exclusive content blocks behind simple paywalls to start earning.",
-          },
-        ].map(({ icon: Icon, title, desc }, i) => (
-          <FadeIn key={title} delay={i * 0.1}>
-            <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-8 flex flex-col gap-4 hover:shadow-[var(--shadow-md)] hover:border-[var(--border-strong)] transition-all duration-300 h-full">
-               <div className="w-12 h-12 rounded-xl bg-[var(--accent-muted)] flex items-center justify-center text-[var(--accent)]">
-                <Icon size={24} />
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        {features.map(({ icon: Icon, title, desc }, i) => (
+          <FadeIn key={title} delay={i * 0.08}>
+            <div className="h-full bg-(--bg-surface) border border-(--border) rounded-xl p-6 flex flex-col gap-4 hover:border-(--border-strong) hover:-translate-y-0.5 transition-all duration-(--transition) group">
+              <div className="w-10 h-10 rounded-lg bg-(--accent-muted) flex items-center justify-center group-hover:bg-accent transition-all duration-300">
+                <Icon size={18} className="text-accent group-hover:text-(--text-inverse) transition-colors duration-300" />
               </div>
               <div>
-                <h3 className="font-display text-xl font-bold text-[var(--text-primary)] mb-2 tracking-tight">{title}</h3>
-                <p className="text-[var(--text-secondary)] leading-relaxed font-medium">{desc}</p>
+                <h3 className="font-display font-semibold text-(--text-primary) mb-1.5">{title}</h3>
+                <p className="text-sm text-(--text-secondary) leading-relaxed">{desc}</p>
               </div>
             </div>
           </FadeIn>
@@ -211,80 +258,70 @@ const Features = () => (
   </section>
 );
 
+const plans = [
+  {
+    name: "Free", price: "₹0", period: "forever",
+    desc: "Get started, no credit card needed.",
+    features: ["Unlimited free blocks", "Public creator page", "Basic analytics", "3 themes"],
+    cta: "Start free", highlight: false,
+  },
+  {
+    name: "Pro", price: "₹499", period: "per month",
+    desc: "For creators ready to earn.",
+    features: ["Everything in Free", "Subscription tiers", "Content gating", "Full analytics", "Custom avatar + bio", "Priority support"],
+    cta: "Get Pro", highlight: true,
+  },
+];
+
 const Pricing = () => (
-  <section className="py-32 px-6 md:px-12 bg-[var(--bg-surface)] border-y border-[var(--border)]">
-    <div className="max-w-5xl mx-auto">
-       <FadeIn className="text-center mb-16">
-        <h2 className="font-display text-3xl sm:text-4xl font-bold text-[var(--text-primary)] tracking-tight mb-4">Simple, Transparent Pricing</h2>
-        <p className="text-lg text-[var(--text-secondary)] font-medium">Start for free, upgrade when you need superpowers.</p>
+  <section className="py-24 px-6 border-t border-(--border)">
+    <div className="max-w-4xl mx-auto">
+      <FadeIn className="text-center mb-16">
+        <h2 className="font-display text-3xl sm:text-4xl font-bold text-(--text-primary) mb-4">
+          Simple pricing
+        </h2>
+        <p className="text-(--text-secondary)">Start free. Upgrade when you&apos;re ready to earn.</p>
       </FadeIn>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-3xl mx-auto">
-        {[
-          {
-            name: "Free",
-            price: "₹0",
-            period: "forever",
-            desc: "Everything you need for a stunning profile.",
-            features: ["Unlimited links & basic blocks", "Custom URL (creatorhub.co/name)", "3 curated themes", "Standard analytics"],
-            cta: "Get Started Free",
-            highlight: false,
-          },
-          {
-            name: "Pro",
-            price: "₹499",
-            period: "per month",
-            desc: "Advanced tools to monetize your audience.",
-            features: [
-              "Everything in Free",
-              "Monetization & subscriptions",
-              "Advanced analytics tracking",
-              "Remove CreatorHub branding",
-              "Premium embed blocks (Spotify, etc.)",
-            ],
-            cta: "Upgrade to Pro",
-            highlight: true,
-          },
-        ].map((plan, i) => (
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-2xl mx-auto">
+        {plans.map((plan, i) => (
           <FadeIn key={plan.name} delay={i * 0.1}>
-            <div
-              className={`h-full rounded-2xl p-8 flex flex-col gap-6 transition-all ${
-                plan.highlight
-                  ? "bg-[var(--bg-surface)] border-[2px] border-[var(--accent)] shadow-[var(--shadow-accent)]"
-                  : "bg-[var(--bg-surface)] border border-[var(--border)] shadow-[var(--shadow-sm)]"
-              }`}
-            >
+            <div className={`h-full rounded-xl p-6 flex flex-col gap-5 border transition-all ${
+              plan.highlight
+                ? "border-(--accent-border) bg-(--accent-muted) shadow-(--shadow-accent)"
+                : "border-(--border) bg-(--bg-surface)"
+            }`}>
               <div>
-                <div className="flex items-center justify-between mb-4">
-                  <span className={`text-lg font-bold text-[var(--text-primary)]`}>{plan.name}</span>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-medium text-(--text-secondary)">{plan.name}</span>
                   {plan.highlight && (
-                    <span className="text-xs font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-[var(--accent)] text-[var(--text-inverse)]">
+                    <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-accent text-(--text-inverse)">
                       Popular
                     </span>
                   )}
                 </div>
-                <div className="flex items-baseline gap-2">
-                  <span className="font-display text-4xl font-black tracking-tight text-[var(--text-primary)]">{plan.price}</span>
-                  <span className={`text-sm font-medium text-[var(--text-muted)]`}>/{plan.period}</span>
+                <div className="flex items-baseline gap-1.5">
+                  <span className="font-display text-3xl font-bold text-(--text-primary)">{plan.price}</span>
+                  <span className="text-sm text-(--text-muted)">/{plan.period}</span>
                 </div>
-                <p className={`text-sm mt-3 font-medium text-[var(--text-secondary)]`}>{plan.desc}</p>
+                <p className="text-sm text-(--text-secondary) mt-1">{plan.desc}</p>
               </div>
 
-              <ul className="flex flex-col gap-3 flex-1 mt-2">
+              <ul className="flex flex-col gap-2 flex-1">
                 {plan.features.map((f) => (
-                  <li key={f} className="flex items-start gap-3 text-sm font-medium">
-                    <Check size={18} className={`shrink-0 mt-0.5 ${plan.highlight ? "text-[var(--accent)]" : "text-[var(--text-secondary)]"}`} />
-                    <span className="text-[var(--text-primary)]">{f}</span>
+                  <li key={f} className="flex items-center gap-2.5 text-sm text-(--text-secondary)">
+                    <Check size={14} className="text-(--success) shrink-0" />
+                    {f}
                   </li>
                 ))}
               </ul>
 
               <Link
                 to="/signup"
-                className={`w-full py-3.5 rounded-xl text-sm font-bold text-center transition-all mt-4 ${
+                className={`w-full py-2.5 rounded-lg text-sm font-semibold text-center transition-all ${
                   plan.highlight
-                    ? "bg-[var(--accent)] text-[var(--text-inverse)] hover:bg-[var(--accent-hover)]"
-                    : "bg-[var(--bg-elevated)] text-[var(--text-primary)] hover:bg-[var(--bg-hover)]"
+                    ? "bg-accent text-(--text-inverse) hover:bg-(--accent-hover)"
+                    : "bg-(--bg-elevated) text-(--text-primary) hover:bg-(--bg-hover)"
                 }`}
               >
                 {plan.cta}
@@ -298,41 +335,48 @@ const Pricing = () => (
 );
 
 const CTABanner = () => (
-   <section className="py-24 px-6 md:px-12 bg-[var(--bg-base)] relative overflow-hidden text-center">
-      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-        <div className="w-[500px] h-[300px] rounded-full opacity-[0.08] blur-[60px]" style={{ background: "radial-gradient(ellipse, #A05C3E, transparent)" }} />
+  <FadeIn>
+    <section className="py-24 px-6 border-t border-(--border)">
+      <div className="max-w-3xl mx-auto text-center">
+        <div className="relative">
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <div className="w-96 h-32 rounded-full opacity-[0.07] blur-3xl" style={{ background: "radial-gradient(ellipse, #f59e0b, transparent)" }} />
+          </div>
+
+          <h2 className="font-display text-4xl sm:text-5xl font-bold text-(--text-primary) mb-4 relative">
+            Your page is one
+            <br />
+            <span className="gradient-text">click away.</span>
+          </h2>
+          <p className="text-(--text-secondary) mb-8 relative">
+            Join creators who are building their audience and earning on their own terms.
+          </p>
+          <Link
+            to="/signup"
+            className="inline-flex items-center gap-2 px-8 py-4 rounded-xl bg-accent text-(--text-inverse) font-bold text-base hover:bg-(--accent-hover) shadow-[0_0_36px_rgba(245,158,11,0.35)] hover:shadow-[0_0_48px_rgba(245,158,11,0.45)] transition-all duration-300 relative"
+          >
+            Create your page free
+            <ArrowRight size={18} />
+          </Link>
+        </div>
       </div>
-      <div className="relative z-10 max-w-2xl mx-auto">
-        <h2 className="font-display text-3xl md:text-5xl font-extrabold text-[var(--text-primary)] mb-6 tracking-tight">
-          Ready to claim your corner of the internet?
-        </h2>
-        <p className="text-lg text-[var(--text-secondary)] mb-10 font-medium">
-          Join thousands of creators who are organizing their digital presence and earning on their own terms.
-        </p>
-        <Link
-          to="/signup"
-          className="inline-flex items-center gap-2 px-10 py-4 rounded-xl bg-[var(--accent)] text-[var(--text-inverse)] font-bold text-lg hover:bg-[var(--accent-hover)] transition-colors shadow-[var(--shadow-lg)]"
-        >
-          Create your page free
-          <ArrowRight size={20} />
-        </Link>
-      </div>
-   </section>
+    </section>
+  </FadeIn>
 );
 
 const Footer = () => (
-  <footer className="bg-[var(--bg-surface)] border-t border-[var(--border)] py-12 px-6 md:px-12">
-    <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+  <footer className="border-t border-(--border) py-8 px-6">
+    <div className="max-w-6xl mx-auto flex items-center justify-between">
       <div className="flex items-center gap-2">
-        <div className="w-6 h-6 rounded-md bg-[var(--accent)] flex items-center justify-center">
-          <Zap size={12} className="text-[var(--text-inverse)]" />
+        <div className="w-6 h-6 rounded-md bg-accent flex items-center justify-center">
+          <Zap size={11} className="text-(--text-inverse)" />
         </div>
-        <span className="font-display font-bold text-[var(--text-primary)] tracking-tight">CreatorHub</span>
+        <span className="text-sm font-display font-bold text-(--text-primary)">CreatorForge</span>
       </div>
-      <div className="flex items-center gap-6 text-sm font-medium text-[var(--text-muted)]">
-        <Link to="/login" className="hover:text-[var(--text-primary)] transition-colors">Log in</Link>
-        <Link to="/signup" className="hover:text-[var(--text-primary)] transition-colors">Sign up</Link>
-        <span>© {new Date().getFullYear()} CreatorHub</span>
+      <div className="flex items-center gap-6 text-sm text-(--text-muted)">
+        <Link to="/login"  className="hover:text-(--text-secondary) transition-colors">Sign in</Link>
+        <Link to="/signup" className="hover:text-(--text-secondary) transition-colors">Sign up</Link>
+        <span>© {new Date().getFullYear()}</span>
       </div>
     </div>
   </footer>
@@ -340,10 +384,10 @@ const Footer = () => (
 
 export default function LandingPage() {
   return (
-    <div className="bg-[var(--bg-base)] min-h-screen font-body selection:bg-[var(--accent-muted)] selection:text-[var(--accent)]">
+    <div className="bg-(--bg-base) min-h-screen">
       <Navbar />
       <Hero />
-      <Problem />
+      <PagePreview />
       <Features />
       <Pricing />
       <CTABanner />

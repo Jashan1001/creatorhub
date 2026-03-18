@@ -2,8 +2,8 @@ import { Request, Response } from "express";
 import razorpay from "../lib/razorpay.js";
 import SubscriptionTier from "../models/SubscriptionTier.js";
 import { AuthRequest } from "../middleware/authMiddleware.js";
+import logger from "../lib/logger.js";
 
-// ─── Creator: create a tier ───────────────────────────────
 export const createTier = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { name, description, price, benefits } = req.body;
@@ -30,12 +30,11 @@ export const createTier = async (req: AuthRequest, res: Response): Promise<void>
 
     res.status(201).json(tier);
   } catch (err) {
-    console.error(err);
+    logger.error("createTier failed", err);
     res.status(500).json({ message: "Server error" });
   }
 };
 
-// ─── Public: get all tiers for a creator ─────────────────
 export const getTiersByCreator = async (req: Request, res: Response): Promise<void> => {
   try {
     const tiers = await SubscriptionTier.find({
@@ -44,24 +43,22 @@ export const getTiersByCreator = async (req: Request, res: Response): Promise<vo
     }).sort({ price: 1 });
 
     res.json(tiers);
-  } catch {
+  } catch (err) {
+    logger.error("getTiersByCreator failed", err);
     res.status(500).json({ message: "Server error" });
   }
 };
 
-// ─── Creator: get own tiers ───────────────────────────────
 export const getMyTiers = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const tiers = await SubscriptionTier.find({ creatorId: req.user!.id }).sort({
-      price: 1,
-    });
+    const tiers = await SubscriptionTier.find({ creatorId: req.user!.id }).sort({ price: 1 });
     res.json(tiers);
-  } catch {
+  } catch (err) {
+    logger.error("getMyTiers failed", err);
     res.status(500).json({ message: "Server error" });
   }
 };
 
-// ─── Creator: update a tier ───────────────────────────────
 export const updateTier = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const tier = await SubscriptionTier.findOne({
@@ -79,17 +76,16 @@ export const updateTier = async (req: AuthRequest, res: Response): Promise<void>
     const updated = await SubscriptionTier.findByIdAndUpdate(
       tier._id,
       { name, description, benefits, active },
-      { new: true }
+      { new: true, runValidators: true }
     );
 
     res.json(updated);
   } catch (err) {
-    console.error(err);
+    logger.error("updateTier failed", err);
     res.status(500).json({ message: "Server error" });
   }
 };
 
-// ─── Creator: delete a tier ───────────────────────────────
 export const deleteTier = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const tier = await SubscriptionTier.findOne({
@@ -103,10 +99,9 @@ export const deleteTier = async (req: AuthRequest, res: Response): Promise<void>
     }
 
     await SubscriptionTier.findByIdAndDelete(tier._id);
-
     res.json({ message: "Tier deleted" });
   } catch (err) {
-    console.error(err);
+    logger.error("deleteTier failed", err);
     res.status(500).json({ message: "Server error" });
   }
 };

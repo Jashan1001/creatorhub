@@ -5,6 +5,7 @@ import razorpay from "../lib/razorpay.js";
 import SubscriptionTier from "../models/SubscriptionTier.js";
 import Subscription from "../models/Subscription.js";
 import { AuthRequest } from "../middleware/authMiddleware.js";
+import logger from "../lib/logger.js";
 
 export const createSubscription = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
@@ -17,7 +18,6 @@ export const createSubscription = async (req: AuthRequest, res: Response): Promi
       return;
     }
 
-    // Prevent subscribing to own tiers
     if (String(tier.creatorId) === fanId) {
       res.status(400).json({ message: "You cannot subscribe to your own tier" });
       return;
@@ -57,7 +57,7 @@ export const createSubscription = async (req: AuthRequest, res: Response): Promi
       keyId: process.env.RAZORPAY_KEY_ID,
     });
   } catch (err) {
-    console.error(err);
+    logger.error("createSubscription failed", err);
     res.status(500).json({ message: "Server error" });
   }
 };
@@ -95,28 +95,61 @@ export const verifyPayment = async (req: AuthRequest, res: Response): Promise<vo
 
     res.json({ message: "Subscription activated", subscription });
   } catch (err) {
-    console.error(err);
+    logger.error("verifyPayment failed", err);
     res.status(500).json({ message: "Server error" });
   }
 };
 
-// ─── Fan: get own subscriptions ───────────────────────────
+export const cancelSubscription = async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const fanId = req.user!.id;
+    const { id } = req.params;
+
+    const subscription = await Subscription.findOne({
+      _id: id,
+      fanId,
+      status: "active",
+    });
+
+    if (!subscription) {
+      res.status(404).json({ message: "Active subscription not found" });
+      return;
+    }
+
+    try {
+        await razorpay.subscriptions.cancel(
+          subscription.razorpaySubscriptionId,
+          true // cancel_at_cycle_end
+      );
+    } catch (rzpErr) {
+      logger.error("Razorpay cancel call failed", rzpErr);
+    }
+
+    await Subscription.findByIdAndUpdate(id, { status: "canceled" });
+
+    res.json({ message: "Subscription canceled" });
+  } catch (err) {
+    logger.error("cancelSubscription failed", err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
 export const getMySubscriptions = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const subscriptions = await Subscription.find({
       fanId: req.user!.id,
-      status: "active",
+      status: { $in: ["active", "past_due"] },
     })
       .populate("creatorId", "name username avatar")
       .populate("tierId", "name price benefits");
 
     res.json(subscriptions);
-  } catch {
+  } catch (err) {
+    logger.error("getMySubscriptions failed", err);
     res.status(500).json({ message: "Server error" });
   }
 };
 
-// ─── Creator: get own subscribers ────────────────────────
 export const getMySubscribers = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const subscriptions = await Subscription.find({
@@ -127,12 +160,12 @@ export const getMySubscribers = async (req: AuthRequest, res: Response): Promise
       .populate("tierId", "name price");
 
     res.json(subscriptions);
-  } catch {
+  } catch (err) {
+    logger.error("getMySubscribers failed", err);
     res.status(500).json({ message: "Server error" });
   }
 };
 
-// ─── Creator: earnings summary ────────────────────────────
 export const getEarningsSummary = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const creatorId = new mongoose.Types.ObjectId(req.user!.id);
@@ -157,10 +190,9 @@ export const getEarningsSummary = async (req: AuthRequest, res: Response): Promi
       },
     ]);
 
-    const summary = result[0] ?? { totalSubscribers: 0, mrr: 0 };
-    res.json(summary);
+    res.json(result[0] ?? { totalSubscribers: 0, mrr: 0 });
   } catch (err) {
-    console.error(err);
+    logger.error("getEarningsSummary failed", err);
     res.status(500).json({ message: "Server error" });
   }
 };

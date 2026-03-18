@@ -1,54 +1,58 @@
-import { z } from "zod";
+export { signupSchema, loginSchema, forgotPasswordSchema, resetPasswordSchema } from "./authSchemas.js";
+export interface User {
+  _id: string;
+  name: string;
+  username: string;
+  email: string;
+  avatar?: string;
+  bio?: string;
+  theme?: "minimal" | "dark" | "gradient";
+  plan: "free" | "pro" | "business";
+  role: "creator" | "admin";
+  createdAt: string;
+}
 
-// Auth
-export const signupSchema = z.object({
-  name: z.string().min(2).max(50),
-  username: z
-    .string()
-    .min(3)
-    .max(30)
-    .regex(/^[a-zA-Z0-9_]+$/, "Username can only contain letters, numbers, and underscores"),
-  email: z.string().email(),
-  password: z.string().min(8).max(100),
-});
+export interface Block {
+  _id: string;
+  userId: string;
+  type: "link" | "text" | "image" | "video" | "paid_post" | "locked";
+  content: Record<string, unknown>;
+  position: number;
+  visible: boolean;
+  tier: "free" | "paid";
+}
 
-export const loginSchema = z.object({
-  email: z.string().min(1, "Email or username is required"),
-  password: z.string().min(1, "Password is required"),
-});
+export interface SubscriptionTier {
+  _id: string;
+  creatorId: string;
+  name: string;
+  description: string;
+  price: number;
+  benefits: string[];
+  razorpayPlanId: string;
+  active: boolean;
+}
 
-// Blocks
-export const createBlockSchema = z.object({
-  type: z.enum(["link", "text", "image", "video", "header", "social", "divider", "paid_post"]),
-  content: z.record(z.unknown()).default({}),
-  position: z.number().int().min(0).default(0),
-  tier: z.enum(["free", "paid"]).default("free"),
-});
+export interface Subscription {
+  _id: string;
+  fanId: User;
+  creatorId: User;
+  tierId: SubscriptionTier;
+  razorpaySubscriptionId: string;
+  status: "active" | "canceled" | "past_due" | "incomplete";
+  currentPeriodEnd?: string;
+  createdAt: string;
+}
 
-export const updateBlockSchema = z.object({
-  type: z.enum(["link", "text", "image", "video", "header", "social", "divider", "paid_post"]).optional(),
-  content: z.record(z.unknown()).optional(),
-  position: z.number().int().min(0).optional(),
-  visible: z.boolean().optional(),
-  tier: z.enum(["free", "paid"]).optional(),
-});
+export interface AnalyticsSummary {
+  daily: { date: string; views: number; clicks: number }[];
+  devices: { _id: string; count: number }[];
+  topLinks: { _id: string; clicks: number; title: string; url: string }[];
+  referrers: { _id: string; count: number }[];
+  totals: { views: number; clicks: number };
+}
 
-export const reorderBlocksSchema = z.object({
-  blocks: z.array(
-    z.object({
-      id: z.string(),
-      position: z.number().int().min(0),
-    })
-  ),
-});
-
-// User / Profile
-export const updateProfileSchema = z.object({
-  name: z.string().min(2).max(50).optional(),
-  bio: z.string().max(200).optional(),
-  theme: z.enum(["minimal", "dark", "gradient"]).optional(),
-});
-
-export const updateThemeSchema = z.object({
-  theme: z.enum(["minimal", "dark", "gradient"]),
-});
+export interface EarningsSummary {
+  totalSubscribers: number;
+  mrr: number;
+}
