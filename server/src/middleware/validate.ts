@@ -5,7 +5,10 @@ const validate =
   (schema: ZodSchema) =>
   (req: Request, res: Response, next: NextFunction): void => {
     try {
-      req.body = schema.parse(req.body);
+      // Validate body (extend later if needed)
+      const parsed = schema.parse(req.body);
+      req.body = parsed;
+
       next();
     } catch (err) {
       if (err instanceof ZodError) {
@@ -18,6 +21,7 @@ const validate =
         });
         return;
       }
+
       next(err);
     }
   };

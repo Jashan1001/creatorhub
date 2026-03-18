@@ -1,4 +1,9 @@
 export { signupSchema, loginSchema, forgotPasswordSchema, resetPasswordSchema } from "./authSchemas.js";
+
+export * from "./block.schema.js";
+export * from "./user.schema.js";
+
+// (You can keep interfaces if you want, but better move them later)
 export interface User {
   _id: string;
   name: string;
