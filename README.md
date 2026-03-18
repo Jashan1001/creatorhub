@@ -1,10 +1,10 @@
-# CreatorForge ⚡
+# CreatorHub ⚡
 
 > Build your page. Set your price. Own your audience.
 
-CreatorForge is a full-stack creator monetization platform. Creators publish a customizable link-in-bio page, set subscription tiers, gate premium content, and track audience analytics — all in one dashboard. Built for the Indian market, powered by Razorpay.
+CreatorHub is a full-stack creator monetization platform. Creators publish a customizable link-in-bio page, set subscription tiers, gate premium content, and track audience analytics — all in one dashboard. Built for the Indian market, powered by Razorpay.
 
-**Live demo:** [creatorforge.vercel.app](https://creatorforge.vercel.app) · **API:** [creatorforge-api.onrender.com](https://creatorforge-api.onrender.com)
+**Live demo:** [creatorhub.vercel.app](https://creatorhub.vercel.app) · **API:** [creatorhub-api.onrender.com](https://creatorhub-api.onrender.com)
 
 ---
 
@@ -50,7 +50,7 @@ CreatorForge is a full-stack creator monetization platform. Creators publish a c
 
 ## Project structure
 ```
-creatorforge/
+creatorhub/
 ├── client/                       # Vite + React frontend
 │   ├── src/
 │   │   ├── components/
@@ -104,7 +104,7 @@ creatorforge/
 PORT=5000
 NODE_ENV=development
 
-MONGODB_URI=mongodb+srv://<user>:<password>@cluster.mongodb.net/creatorforge
+MONGODB_URI=mongodb+srv://<user>:<password>@cluster.mongodb.net/creatorhub
 
 # Generate: node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"
 JWT_SECRET=
@@ -114,7 +114,7 @@ RAZORPAY_KEY_SECRET=
 RAZORPAY_WEBHOOK_SECRET=
 
 RESEND_API_KEY=re_...
-FROM_EMAIL=CreatorForge <noreply@yourdomain.com>
+FROM_EMAIL=CreatorHub <noreply@yourdomain.com>
 
 CLOUDINARY_CLOUD_NAME=
 CLOUDINARY_API_KEY=
@@ -131,8 +131,8 @@ VITE_API_URL=http://localhost:5000/api
 ### Run locally
 ```bash
 # 1. Clone
-git clone https://github.com/yourusername/creatorforge.git
-cd creatorforge
+git clone https://github.com/yourusername/creatorhub.git
+cd creatorhub
 
 # 2. Server
 cd server
@@ -174,21 +174,20 @@ Every page view and link click fires `POST /analytics/track` (fire-and-forget, n
 ### Server → Render
 1. Connect your GitHub repo to Render
 2. Render auto-detects `render.yaml` in the repo root
-3. Set environment variables in the Render dashboard (marked `sync: false` in `render.yaml`)
+3. Set environment variables in the Render dashboard
 4. Deploy
 
 ### Client → Vercel
 1. Connect your GitHub repo to Vercel
 2. Set root directory to `client/`
-3. Add `VITE_API_URL=https://your-render-url.onrender.com/api` as an environment variable
+3. Add `VITE_API_URL=https://your-render-url.onrender.com/api`
 4. Deploy — `vercel.json` handles SPA routing and cache headers automatically
 
 ### Razorpay webhook setup
-After deploying the server, add your webhook URL in the Razorpay dashboard:
 ```
 https://your-render-url.onrender.com/api/webhooks/razorpay
 ```
-Select events: `subscription.activated`, `subscription.charged`, `subscription.cancelled`, `subscription.completed`, `subscription.halted`
+Select: `subscription.activated`, `subscription.charged`, `subscription.cancelled`, `subscription.completed`, `subscription.halted`
 
 ---
 
